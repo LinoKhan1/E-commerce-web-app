@@ -1,0 +1,23 @@
+{
+  "Version": 1,
+  "Hash": "ATBeBxBgcJAI+GLlnQGZ+lncoaFhxmTI2P7pkbr+XXI=",
+  "Source": "e-commerce_app.Server",
+  "BasePath": "_content/e-commerce_app.Server",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [
+    {
+      "Identity": "C:\\Users\\User\\source\\repos\\e-commerce_app\\e-commerce_app.client\\e-commerce_app.client.esproj",
+      "Version": 2,
+      "Source": "e-commerce_app.client",
+      "GetPublishAssetsTargets": "GetCurrentProjectPublishStaticWebAssetItems",
+      "AdditionalPublishProperties": "",
+      "AdditionalPublishPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained",
+      "GetBuildAssetsTargets": "GetCurrentProjectBuildStaticWebAssetItems",
+      "AdditionalBuildProperties": "",
+      "AdditionalBuildPropertiesToRemove": "WebPublishProfileFile;TargetFramework;RuntimeIdentifier;SelfContained"
+    }
+  ],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
