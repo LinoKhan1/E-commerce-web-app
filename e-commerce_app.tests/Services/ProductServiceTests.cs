@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using e_commerce_app.Server.APIs.DTOs.ProductDTOs;
 using e_commerce_app.Server.Core.Entities;
 using e_commerce_app.Server.Core.Services;
 using e_commerce_app.Server.Infrastructure.Repositories.Interfaces;
@@ -102,6 +103,59 @@ namespace e_commerce_app.tests.Services
             Assert.Equal("Product 1", result.Name);
             Assert.Equal(10.0m, result.Price);
 
+        }
+
+        [Fact]
+        public async Task AddProductAsync_Should_Add_Product()
+        {
+            // Arrange
+            var productDto = new ProductDTO { Name = "New Product", Price = 20.0m };
+            var product = new Product { Id = 1, Name = "New Product", Price = 20.0m };
+            _repositoryMock.Setup(repo => repo.AddProductAsync(It.IsAny<Product>())).Returns(Task.CompletedTask);
+
+            var productService = new ProductService(_repositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object, _mapper);
+
+            // Act
+            await productService.AddProductAsync(productDto);
+
+            // Assert
+            _repositoryMock.Verify(repo => repo.AddProductAsync(It.Is<Product>(p => p.Name == product.Name && p.Price == product.Price)), Times.Once);
+            _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateProductAsync_Should_Update_Product()
+        {
+            // Arrange
+            var productDto = new ProductDTO { Id = 1, Name = "Updated Product", Price = 25.0m };
+            var product = new Product { Id = 1, Name = "Updated Product", Price = 25.0m };
+            _repositoryMock.Setup(repo => repo.UpdateProductAsync(It.IsAny<Product>())).Returns(Task.CompletedTask);
+
+            var productService = new ProductService(_repositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object, _mapper);
+
+            // Act
+            await productService.UpdateProductAsync(productDto);
+
+            // Assert
+            _repositoryMock.Verify(repo => repo.UpdateProductAsync(It.Is<Product>(p => p.Id == product.Id && p.Name == product.Name && p.Price == product.Price)), Times.Once);
+            _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task DeleteProductAsync_Should_Delete_Product()
+        {
+            // Arrange
+            int productId = 1;
+            _repositoryMock.Setup(repo => repo.DeleteProductAsync(productId)).Returns(Task.CompletedTask);
+
+            var productService = new ProductService(_repositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object, _mapper);
+
+            // Act
+            await productService.DeleteProductAsync(productId);
+
+            // Assert
+            _repositoryMock.Verify(repo => repo.DeleteProductAsync(productId), Times.Once);
+            _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Once);
         }
 
     }

@@ -38,9 +38,18 @@ namespace e_commerce_app.tests.Repositories.Configuration
             new Product {Id = 2, Name = "Smartphone", Description="Test Description", Price=35099, Stock=50, CategoryId= 1, Category = categories[0]},
             new Product {Id = 3, Name = "Novel", Description="Test Description", Price=349, Stock=50, CategoryId=2, Category = categories[1]}
         };
+            var cartItems = new List<CartItem>
+            {
+                new CartItem {CartItemId = 1, UserId = "user1", ProductId = 1, Quantity = 2, DateAdded = DateTime.UtcNow,
+                Product = products[0]},
+                new CartItem {CartItemId = 2, UserId = "user2", ProductId = 2, Quantity = 1, DateAdded = DateTime.UtcNow,
+                Product = products[1] }
+            };
 
             Context.Categories.AddRange(categories);
             Context.Products.AddRange(products);
+            Context.CartItems.AddRange(cartItems);
+
             Context.SaveChanges();
         }
 

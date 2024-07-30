@@ -1,4 +1,5 @@
-﻿using e_commerce_app.Server.Infrastructure.Data;
+﻿using e_commerce_app.Server.Core.Entities;
+using e_commerce_app.Server.Infrastructure.Data;
 using e_commerce_app.Server.Infrastructure.Repositories;
 using e_commerce_app.tests.Repositories.Configuration;
 using Microsoft.Extensions.Logging;
@@ -72,5 +73,68 @@ namespace e_commerce_app.tests.Repositories
             // Assert
             Assert.Null(result);
         }
+
+        /// <summary>
+        /// Tests that AddCategoryAsync method adds a new category.
+        /// </summary>
+        [Fact]
+        public async Task AddCategoryAsync_Should_Add_Category()
+        {
+            // Arrange
+            var newCategory = new Category
+            {
+                CategoryId = 3, // Specify an ID (ensure this ID does not conflict with existing IDs)
+                Name = "Furniture"
+            };
+
+            // Act
+            await _categoryRepository.AddCategoryAsync(newCategory);
+            var addedCategory = await _categoryRepository.GetCategoryByIdAsync(newCategory.CategoryId);
+
+            // Assert
+            Assert.NotNull(addedCategory);
+            Assert.Equal(newCategory.CategoryId, addedCategory.CategoryId);
+            Assert.Equal(newCategory.Name, addedCategory.Name);
+        }
+
+
+        /// <summary>
+        /// Tests that UpdateCategoryAsync updates an existing category.
+        /// </summary>
+        [Fact]
+        public async Task UpdateCategoryAsync_Should_Update_Existing_Category()
+        {
+            // Arrange
+            var category = await _categoryRepository.GetCategoryByIdAsync(1);
+            category.Name = "Updated Category";
+
+            // Act
+            await _categoryRepository.UpdateCategoryAsync(category);
+            await _context.SaveChangesAsync();
+
+            // Assert
+            var updatedCategory = await _categoryRepository.GetCategoryByIdAsync(1);
+            Assert.NotNull(updatedCategory);
+            Assert.Equal("Updated Category", updatedCategory.Name);
+        }
+
+        /// <summary>
+        /// Tests that DeleteCategoryAsync removes a category.
+        /// </summary>
+        [Fact]
+        public async Task DeleteCategoryAsync_Should_Remove_Category()
+        {
+            // Arrange
+            var categoryId = 1;
+
+            // Act
+            await _categoryRepository.DeleteCategoryAsync(categoryId);
+            await _context.SaveChangesAsync();
+
+            // Assert
+            var deletedCategory = await _categoryRepository.GetCategoryByIdAsync(categoryId);
+            Assert.Null(deletedCategory);
+        }
+
     }
 }
