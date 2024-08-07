@@ -1,9 +1,12 @@
-﻿using e_commerce_app.Server.Core.Entities;
+﻿using Castle.Core.Logging;
+using e_commerce_app.Server.Core.Entities;
 using e_commerce_app.Server.Infrastructure.Data;
 using e_commerce_app.Server.Infrastructure.Repositories;
 using e_commerce_app.Server.Infrastructure.Repositories.Interfaces;
 using e_commerce_app.tests.Repositories.Configuration;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,11 +19,13 @@ namespace e_commerce_app.tests.Repositories
     {
         private readonly ApplicationDbContext _context;
         private readonly CartRepository _cartRepository;
+        private readonly Mock<ILogger<CartRepository>> _loggerMock;
 
         public CartRepositoryTests(DbContextFixture fixture)
         {
             _context = fixture.Context;
-            _cartRepository = new CartRepository(_context);
+            _loggerMock = new Mock<ILogger<CartRepository>>();
+            _cartRepository = new CartRepository(_context, _loggerMock.Object);
 
         }
         /// <summary>
@@ -42,7 +47,7 @@ namespace e_commerce_app.tests.Repositories
             Assert.Equal(1, cartItemList[0].ProductId);
             Assert.Equal(2, cartItemList[0].Quantity);
             Assert.NotNull(cartItemList[0].Product);
-            Assert.Equal(1, cartItemList[0].Product.Id);
+            Assert.Equal(1, cartItemList[0].Product.ProductId);
             Assert.Equal("Laptop", cartItemList[0].Product.Name);
             Assert.Equal(35099, cartItemList[0].Product.Price);
         }
@@ -71,7 +76,7 @@ namespace e_commerce_app.tests.Repositories
         public async Task AddCartItemAsync_AddsNewItem()
         {
             // Arrange
-            var product = await _context.Products.FirstAsync(p => p.Id == 3);
+            var product = await _context.Products.FirstAsync(p => p.ProductId == 3);
             var newCartItem = new CartItem
             {
                 CartItemId = 3,

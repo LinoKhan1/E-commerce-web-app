@@ -4,10 +4,12 @@ using e_commerce_app.Server.Core.Entities;
 using e_commerce_app.Server.Core.Services;
 using e_commerce_app.Server.Infrastructure.Repositories.Interfaces;
 using e_commerce_app.Server.Infrastructure.unitOfWork;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -15,122 +17,119 @@ namespace e_commerce_app.tests.Services
 {
     public class CartServiceTests
     {
-        private readonly Mock<ICartRepository> _mockRepository;
+
+        private readonly Mock<ICartRepository> _mockCartRepository;
         private readonly Mock<IUnitOfWork> _mockUnitOfWork;
-        private readonly IMapper _mapper;
+        private readonly Mock<IMapper> _mockMapper;
+        private readonly Mock<ILogger<CartService>> _mockLogger;
+        private readonly CartService _cartService;
 
         public CartServiceTests()
         {
-            // Setup AutoMapper
-            var mapperConfig = new MapperConfiguration(cfg =>
-            {
-                cfg.AddProfile<AutoMapperProfile>();
-            });
-            _mapper = mapperConfig.CreateMapper();
-
-            // Setup Mock Repository
-            _mockRepository = new Mock<ICartRepository>();
-
-            // Setup Mock UnitOfWork
+            _mockCartRepository = new Mock<ICartRepository>();
             _mockUnitOfWork = new Mock<IUnitOfWork>();
-
-
+            _mockMapper = new Mock<IMapper>();
+            _mockLogger = new Mock<ILogger<CartService>>();
+            _cartService = new CartService(_mockCartRepository.Object, _mockUnitOfWork.Object, _mockMapper.Object, _mockLogger.Object);
         }
 
         [Fact]
         public async Task GetCartItemsAsync_ReturnsCartItems()
         {
-
             // Arrange
-            string userId = "testUserId";
-            var expectedCartItems = new List<CartItem>
-            {
-                new CartItem {CartItemId = 1, UserId = userId, ProductId = 1, Quantity = 2,
-                    Product = new Product{Id = 1, Name = "Product 1", Price= 10.99m} },
-                new CartItem {CartItemId = 2, UserId = userId, ProductId = 2, Quantity = 1,
-                    Product = new Product{Id = 2, Name = "Product 2", Price= 10.99m} },
+            var userId = "user123";
+            var cartItems = new List<CartItem> { new CartItem { CartItemId = 1, ProductId = 1, UserId = userId, Quantity = 2, DateAdded = DateTime.UtcNow } };
+            var cartItemDtos = new List<CartItemDTO> { new CartItemDTO { Id = 1, ProductId = 1, Quantity = 2 } };
 
-            };
+            _mockCartRepository.Setup(repo => repo.GetCartItemsAsync(userId)).ReturnsAsync(cartItems);
+            _mockMapper.Setup(m => m.Map<IEnumerable<CartItemDTO>>(cartItems)).Returns(cartItemDtos);
 
-            _mockRepository.Setup(repo => repo.GetCartItemsAsync(userId))
-                .ReturnsAsync(expectedCartItems);
-
-            var cartService = new CartService(_mockRepository.Object, _mockUnitOfWork.Object, _mapper);
-
-            // Act 
-            var result = await cartService.GetCartItemsAsync(userId);
+            // Act
+            var result = await _cartService.GetCartItemsAsync(userId);
 
             // Assert
-            // Assert
-            _mockRepository.Verify(repo => repo.GetCartItemsAsync(userId), Times.Once);
-
-            // Additional assertions based on DTO mappings
-            Assert.NotNull(result);
-            var resultList = result.ToList();
-            Assert.Equal(expectedCartItems.Count, resultList.Count);
-
-            // Verify mapping correctness
-            for (int i = 0; i < expectedCartItems.Count; i++)
-            {
-                Assert.Equal(expectedCartItems[i].ProductId, resultList[i].ProductId);
-                Assert.Equal(expectedCartItems[i].Product.Name, resultList[i].ProductName); // Accessing ProductName through navigation property
-                Assert.Equal(expectedCartItems[i].Product.Price, resultList[i].Price); // Accessing Price through navigation property
-                Assert.Equal(expectedCartItems[i].Quantity, resultList[i].Quantity);
-            }
-
-
-
+            Assert.Equal(cartItemDtos, result);
         }
 
         [Fact]
         public async Task AddCartItemAsync_AddsCartItem()
         {
             // Arrange
-            string userId = "testUserId";
+            var userId = "user123";
             var addToCartDto = new AddToCartDTO { ProductId = 1, Quantity = 2 };
-            var cartService = new CartService(_mockRepository.Object, _mockUnitOfWork.Object, _mapper);
 
             // Act
-            await cartService.AddCartItemAsync(userId, addToCartDto);
+            await _cartService.AddCartItemAsync(userId, addToCartDto);
 
             // Assert
-            _mockRepository.Verify(repo => repo.AddCartItemAsync(It.IsAny<CartItem>()), Times.Once());
+            _mockCartRepository.Verify(repo => repo.AddCartItemAsync(It.IsAny<CartItem>()), Times.Once);
             _mockUnitOfWork.Verify(uow => uow.CompleteAsync(), Times.Once);
         }
 
         [Fact]
-        public async Task UpdateCartItemAsync_UpdatesCartItemQuantity()
+        public async Task AddCartItemAsync_ThrowsArgumentException_WhenQuantityIsZero()
         {
             // Arrange
-            int cartItemId = 1;
-            int newQuantity = 3;
+            var userId = "user123";
+            var addToCartDto = new AddToCartDTO { ProductId = 1, Quantity = 0 };
 
-            var cartItem = new CartItem { CartItemId = cartItemId, Quantity = 2 };
-            _mockRepository.Setup(repo => repo.GetCartItemByIdAsync(cartItemId))
-                              .ReturnsAsync(cartItem);
-            var cartService = new CartService(_mockRepository.Object, _mockUnitOfWork.Object, _mapper);
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _cartService.AddCartItemAsync(userId, addToCartDto));
+        }
+
+        [Fact]
+        public async Task UpdateCartItemAsync_UpdatesCartItem()
+        {
+            // Arrange
+            var cartItemId = 1;
+            var quantity = 5;
+            var existingCartItem = new CartItem { CartItemId = cartItemId, Quantity = 2 };
+            var updatedCartItem = new CartItem { CartItemId = cartItemId, Quantity = quantity };
+
+            _mockCartRepository.Setup(repo => repo.GetCartItemByIdAsync(cartItemId)).ReturnsAsync(existingCartItem);
 
             // Act
-            await cartService.UpdateCartItemAsync(cartItemId, newQuantity);
+            await _cartService.UpdateCartItemAsync(cartItemId, quantity);
 
             // Assert
-            Assert.Equal(newQuantity, cartItem.Quantity);
-            _mockRepository.Verify(repo => repo.UpdateCartItemAsync(cartItem), Times.Once);
+            _mockCartRepository.Verify(repo => repo.UpdateCartItemAsync(It.Is<CartItem>(c => c.Quantity == quantity)), Times.Once);
             _mockUnitOfWork.Verify(uow => uow.CompleteAsync(), Times.Once);
+        }
+
+        [Fact]
+        public async Task UpdateCartItemAsync_ThrowsArgumentException_WhenQuantityIsZero()
+        {
+            // Arrange
+            var cartItemId = 1;
+            var quantity = 0;
+
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentException>(() => _cartService.UpdateCartItemAsync(cartItemId, quantity));
+        }
+
+        [Fact]
+        public async Task UpdateCartItemAsync_ThrowsKeyNotFoundException_WhenCartItemDoesNotExist()
+        {
+            // Arrange
+            var cartItemId = 1;
+            var quantity = 5;
+            _mockCartRepository.Setup(repo => repo.GetCartItemByIdAsync(cartItemId)).ReturnsAsync((CartItem)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _cartService.UpdateCartItemAsync(cartItemId, quantity));
         }
 
         [Fact]
         public async Task RemoveCartItemAsync_RemovesCartItem()
         {
             // Arrange
-            int cartItemId = 1;
-            var cartService = new CartService(_mockRepository.Object, _mockUnitOfWork.Object, _mapper);
+            var cartItemId = 1;
 
             // Act
-            await cartService.RemoveCartItemAsync(cartItemId);
+            await _cartService.RemoveCartItemAsync(cartItemId);
 
             // Assert
-            _mockRepository.Verify(repo => repo.DeleteCartItemAsync(cartItemId), Times.Once);
+            _mockCartRepository.Verify(repo => repo.DeleteCartItemAsync(cartItemId), Times.Once);
             _mockUnitOfWork.Verify(uow => uow.CompleteAsync(), Times.Once);
         }
     }

@@ -3,6 +3,7 @@ using e_commerce_app.Server.APIs.DTOs.CartDTOs;
 using e_commerce_app.Server.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using System;
 using System.Collections.Generic;
@@ -16,12 +17,14 @@ namespace e_commerce_app.tests.Controllers
     public class CartControllerTests
     {
         private readonly Mock<ICartService> _mockCartService;
+        private readonly Mock<ILogger<CartController>> _mockLogger;
         private readonly CartController _controller;
 
         public CartControllerTests()
         {
             _mockCartService = new Mock<ICartService>();
-            _controller = new CartController(_mockCartService.Object);
+            _mockLogger = new Mock<ILogger<CartController>>();
+            _controller = new CartController(_mockCartService.Object, _mockLogger.Object);
         }
 
         [Fact]

@@ -2,63 +2,96 @@
 using e_commerce_app.Server.Infrastructure.Data;
 using e_commerce_app.Server.Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace e_commerce_app.Server.Infrastructure.Repositories
 {
     public class CartRepository : ICartRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<CartRepository> _logger;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CartRepository"/> class.
-        /// </summary>
-        /// <param name="context">The application database context.</param>
-        public CartRepository(ApplicationDbContext context)
+        public CartRepository(ApplicationDbContext context, ILogger<CartRepository> logger)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
+            _logger = logger;
         }
 
-        /// <summary>
-        /// Gets the cart items for a specified user.
-        /// </summary>
-        /// <param name="userId">The unique identifier for the user.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains a collection of CartItems.</returns>
         public async Task<IEnumerable<CartItem>> GetCartItemsAsync(string userId)
         {
-            return await _context.CartItems
-                .Include(ci => ci.Product)
-                .Where(ci => ci.UserId == userId)
-                .ToListAsync();
+            try
+            {
+                return await _context.CartItems
+                    .Include(ci => ci.Product)
+                    .Where(ci => ci.UserId == userId)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving cart items.");
+                throw;
+            }
         }
 
-        /// <summary>
-        /// Gets a cart item by its unique identifier.
-        /// </summary>
-        /// <param name="cartItemId">The unique identifier for the cart item.</param>
-        /// <returns>A task that represents the asynchronous operation. The task result contains the CartItem if found; otherwise, null.</returns>
         public async Task<CartItem> GetCartItemByIdAsync(int cartItemId)
         {
-            return await _context.CartItems.FirstOrDefaultAsync(ci => ci.CartItemId == cartItemId);
+            try
+            {
+                return await _context.CartItems.FirstOrDefaultAsync(ci => ci.CartItemId == cartItemId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while retrieving cart item with ID {cartItemId}.");
+                throw;
+            }
         }
 
         public async Task AddCartItemAsync(CartItem cartItem)
         {
-            await _context.CartItems.AddAsync(cartItem);
-
+            try
+            {
+                await _context.CartItems.AddAsync(cartItem);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while adding a new cart item.");
+                throw;
+            }
         }
 
         public async Task UpdateCartItemAsync(CartItem cartItem)
         {
-            _context.Entry(cartItem).State = EntityState.Modified;
+            try
+            {
+                _context.Entry(cartItem).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while updating cart item with ID {cartItem.CartItemId}.");
+                throw;
+            }
         }
 
-        public async Task DeleteCartItemAsync(int id)
+        public async Task DeleteCartItemAsync(int cartItemId)
         {
-            var cartItem = await _context.CartItems.FindAsync(id);
-            if (cartItem != null)
+            try
             {
-                _context.CartItems.Remove(cartItem);
+                var cartItem = await _context.CartItems.FindAsync(cartItemId);
+                if (cartItem == null) throw new KeyNotFoundException($"Cart item with ID {cartItemId} not found.");
 
+                _context.CartItems.Remove(cartItem);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while deleting cart item with ID {cartItemId}.");
+                throw;
             }
         }
     }

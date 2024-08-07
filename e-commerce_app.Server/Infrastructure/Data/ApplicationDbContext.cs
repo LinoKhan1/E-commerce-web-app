@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Reflection.Emit;
 
 namespace e_commerce_app.Server.Infrastructure.Data
 {
@@ -23,7 +24,20 @@ namespace e_commerce_app.Server.Infrastructure.Data
                 .HasOne(ci => ci.Product)
                 .WithMany()
                 .HasForeignKey(ci => ci.ProductId);
+
+            builder.Entity<Product>()
+           .HasOne(p => p.Category)
+           .WithMany(c => c.Products)
+           .HasForeignKey(p => p.CategoryId);
+
+            builder.Entity<Category>()
+                .HasMany(c => c.Products)
+                .WithOne(p => p.Category)
+                .HasForeignKey(p => p.CategoryId);
+
             base.OnModelCreating(builder);
+
+
         }
     }
 }

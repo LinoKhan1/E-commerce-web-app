@@ -18,7 +18,7 @@ namespace e_commerce_app.tests.Controllers
     public class CategoryControllerTests
     {
         private readonly Mock<ICategoryService> _mockCategoryService;
-        private readonly Mock<ILogger> _mockLogger;
+        private readonly Mock<ILogger<CategoryController>> _mockLogger;
         private readonly CategoryController _controller;
 
 
@@ -28,7 +28,7 @@ namespace e_commerce_app.tests.Controllers
         public CategoryControllerTests()
         {
             _mockCategoryService = new Mock<ICategoryService>();
-            _mockLogger = new Mock<ILogger>();
+            _mockLogger = new Mock<ILogger<CategoryController>>();
             _controller = new CategoryController(_mockCategoryService.Object, _mockLogger.Object);
         }
 
@@ -41,8 +41,8 @@ namespace e_commerce_app.tests.Controllers
             // Arrange
             var mockCategories = new List<CategoryDTO>
             {
-                new CategoryDTO { Id = 1, Name = "Category 1" },
-                new CategoryDTO { Id = 2, Name = "Category 2" }
+                new CategoryDTO { CategoryId = 1, Name = "Category 1" },
+                new CategoryDTO { CategoryId = 2, Name = "Category 2" }
             };
             _mockCategoryService.Setup(service => service.GetAllCategoriesAsync())
                                 .ReturnsAsync(mockCategories);
@@ -64,7 +64,7 @@ namespace e_commerce_app.tests.Controllers
         {
             // Arrange
             int categoryId = 1;
-            var mockCategory = new CategoryDTO { Id = categoryId, Name = "Category 1" };
+            var mockCategory = new CategoryDTO { CategoryId = categoryId, Name = "Category 1" };
             _mockCategoryService.Setup(service => service.GetCategoryByIdAsync(categoryId))
                                 .ReturnsAsync(mockCategory);
 
@@ -74,7 +74,7 @@ namespace e_commerce_app.tests.Controllers
             // Assert
             var okResult = Assert.IsType<OkObjectResult>(result.Result);
             var category = Assert.IsType<CategoryDTO>(okResult.Value);
-            Assert.Equal(categoryId, category.Id);
+            Assert.Equal(categoryId, category.CategoryId);
         }
 
         /// <summary>
@@ -84,15 +84,15 @@ namespace e_commerce_app.tests.Controllers
         public async Task PostCategory_ReturnsCreatedAtAction()
         {
             // Arrange
-            var newCategory = new CategoryDTO { Id = 3, Name = "New Category" };
+            var newCategory = new CategoryDTO { CategoryId = 3, Name = "New Category" };
 
             // Act
-            var result = await _controller.PostCategory(newCategory);
+            var result = await _controller.CreateCategory(newCategory);
 
             // Assert
-            var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result.Result);
+            var createdAtActionResult = Assert.IsType<CreatedAtActionResult>(result);
             Assert.Equal(nameof(_controller.GetCategory), createdAtActionResult.ActionName);
-            Assert.Equal(newCategory.Id, createdAtActionResult.RouteValues["id"]);
+            Assert.Equal(newCategory.CategoryId, createdAtActionResult.RouteValues["id"]);
         }
 
         /// <summary>
@@ -103,10 +103,10 @@ namespace e_commerce_app.tests.Controllers
         {
             // Arrange
             int categoryId = 1;
-            var categoryToUpdate = new CategoryDTO { Id = categoryId, Name = "Updated Category" };
+            var categoryToUpdate = new CategoryDTO { CategoryId = categoryId, Name = "Updated Category" };
 
             // Act
-            var result = await _controller.PutCategory(categoryId, categoryToUpdate);
+            var result = await _controller.UpdateCategory(categoryId, categoryToUpdate);
 
             // Assert
             Assert.IsType<NoContentResult>(result);
@@ -127,5 +127,6 @@ namespace e_commerce_app.tests.Controllers
             // Assert
             Assert.IsType<NoContentResult>(result);
         }
+        
     }
 }

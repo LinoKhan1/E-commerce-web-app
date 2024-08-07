@@ -17,143 +17,118 @@ namespace e_commerce_app.tests.Services
     public class CategoryServiceTests
     {
         private readonly Mock<ICategoryRepository> _mockCategoryRepository;
-        private readonly Mock<IUnitOfWork> _mockUnitOfWork;
-        private readonly Mock<IMapper> _mockMapper; // Changed to Mock<IMapper>
-        private readonly Mock<ILogger<CategoryService>> _loggerMock;
+        private readonly Mock<IMapper> _mockMapper;
+        private readonly Mock<ILogger<CategoryService>> _mockLogger;
+        private readonly CategoryService _categoryService;
 
         public CategoryServiceTests()
         {
             _mockCategoryRepository = new Mock<ICategoryRepository>();
-            _mockUnitOfWork = new Mock<IUnitOfWork>();
-            _loggerMock = new Mock<ILogger<CategoryService>>();
-            _mockMapper = new Mock<IMapper>(); // Initialize Mock<IMapper>
-
-            // Configure the Mock<IMapper> to return the appropriate values
-            _mockMapper.Setup(m => m.Map<CategoryDTO>(It.IsAny<Category>()))
-                .Returns((Category c) => new CategoryDTO { Id = c.CategoryId, Name = c.Name });
-
-            _mockMapper.Setup(m => m.Map<Category>(It.IsAny<CategoryDTO>()))
-                .Returns((CategoryDTO dto) => new Category { CategoryId = dto.Id, Name = dto.Name });
+            _mockMapper = new Mock<IMapper>();
+            _mockLogger = new Mock<ILogger<CategoryService>>();
+            _categoryService = new CategoryService(_mockCategoryRepository.Object, _mockMapper.Object, _mockLogger.Object);
         }
 
-        /*[Fact]
-        public async Task GetAllCategoriesAsync_Should_Return_All_Categories()
+        [Fact]
+        public async Task GetAllCategoriesAsync_ReturnsCategories()
         {
             // Arrange
-            var categories = new List<Category>
-            {
-                new Category { CategoryId = 1, Name = "Electronic" },
-                new Category { CategoryId = 2, Name = "Books" }
-            };
+            var categories = new List<Category> { new Category { CategoryId = 1, Name = "Category 1" } };
+            var categoryDtos = new List<CategoryDTO> { new CategoryDTO { CategoryId = 1, Name = "Category 1" } };
+
             _mockCategoryRepository.Setup(repo => repo.GetAllCategoriesAsync()).ReturnsAsync(categories);
-
-            var categoryService = new CategoryService(_mockCategoryRepository.Object, _mockUnitOfWork.Object, _mockMapper.Object, _loggerMock.Object);
-
-            // Act
-            var result = await categoryService.GetAllCategoriesAsync();
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count());
-
-            Assert.Collection(result,
-                item =>
-                {
-                    Assert.Equal(1, item.Id);
-                    Assert.Equal("Electronic", item.Name);
-                },
-                item =>
-                {
-                    Assert.Equal(2, item.Id);
-                    Assert.Equal("Books", item.Name);
-                });
-        }*/
-
-        [Fact]
-        public async Task GetCategoryByIdAsync_Should_Return_Correct_Category()
-        {
-            // Arrange
-            int categoryId = 1;
-            var category = new Category { CategoryId = categoryId, Name = "Electronic" };
-            _mockCategoryRepository.Setup(repo => repo.GetCategoryByIdAsync(categoryId)).ReturnsAsync(category);
-
-            var categoryService = new CategoryService(_mockCategoryRepository.Object, _mockUnitOfWork.Object, _mockMapper.Object, _loggerMock.Object);
+            _mockMapper.Setup(m => m.Map<IEnumerable<CategoryDTO>>(categories)).Returns(categoryDtos);
 
             // Act
-            var result = await categoryService.GetCategoryByIdAsync(categoryId);
+            var result = await _categoryService.GetAllCategoriesAsync();
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(categoryId, result.Id);
-            Assert.Equal("Electronic", result.Name);
+            Assert.Equal(categoryDtos, result);
         }
 
         [Fact]
-        public async Task GetCategoryByIdAsync_Should_Return_Null_For_Invalid_Id()
+        public async Task GetCategoryByIdAsync_ReturnsCategory()
         {
             // Arrange
-            int invalidCategoryId = 99;
-            _mockCategoryRepository.Setup(repo => repo.GetCategoryByIdAsync(invalidCategoryId)).ReturnsAsync((Category)null);
+            var category = new Category { CategoryId = 1, Name = "Category 1" };
+            var categoryDto = new CategoryDTO { CategoryId = 1, Name = "Category 1" };
 
-            var categoryService = new CategoryService(_mockCategoryRepository.Object, _mockUnitOfWork.Object, _mockMapper.Object, _loggerMock.Object);
+            _mockCategoryRepository.Setup(repo => repo.GetCategoryByIdAsync(1)).ReturnsAsync(category);
+            _mockMapper.Setup(m => m.Map<CategoryDTO>(category)).Returns(categoryDto);
 
             // Act
-            var result = await categoryService.GetCategoryByIdAsync(invalidCategoryId);
+            var result = await _categoryService.GetCategoryByIdAsync(1);
 
             // Assert
-            Assert.Null(result);
+            Assert.Equal(categoryDto, result);
         }
 
         [Fact]
-        public async Task AddCategoryAsync_Should_Add_Category()
+        public async Task GetCategoryByIdAsync_ThrowsKeyNotFoundException()
         {
             // Arrange
-            var categoryDto = new CategoryDTO { Id = 0, Name = "Furniture" };
-            var category = new Category { Name = "Furniture" };
+            _mockCategoryRepository.Setup(repo => repo.GetCategoryByIdAsync(1)).ReturnsAsync((Category)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _categoryService.GetCategoryByIdAsync(1));
+        }
+
+        [Fact]
+        public async Task AddCategoryAsync_AddsCategory()
+        {
+            // Arrange
+            var categoryDto = new CategoryDTO { CategoryId = 1, Name = "Category 1" };
+            var category = new Category { CategoryId = 1, Name = "Category 1" };
+
             _mockMapper.Setup(m => m.Map<Category>(categoryDto)).Returns(category);
 
-            var categoryService = new CategoryService(_mockCategoryRepository.Object, _mockUnitOfWork.Object, _mockMapper.Object, _loggerMock.Object);
-
             // Act
-            await categoryService.AddCategoryAsync(categoryDto);
+            await _categoryService.AddCategoryAsync(categoryDto);
 
             // Assert
-            _mockCategoryRepository.Verify(repo => repo.AddCategoryAsync(It.Is<Category>(c => c.Name == "Furniture")), Times.Once);
-            _mockUnitOfWork.Verify(uow => uow.CompleteAsync(), Times.Once);
+            _mockCategoryRepository.Verify(repo => repo.AddCategoryAsync(category), Times.Once);
         }
 
         [Fact]
-        public async Task UpdateCategoryAsync_Should_Update_Category()
+        public async Task UpdateCategoryAsync_UpdatesCategory()
         {
             // Arrange
-            var categoryDto = new CategoryDTO { Id = 1, Name = "Updated Name" };
-            var category = new Category { CategoryId = 1, Name = "Updated Name" };
-            _mockMapper.Setup(m => m.Map<Category>(categoryDto)).Returns(category);
+            var existingCategory = new Category { CategoryId = 1, Name = "Old Name" };
+            var categoryDto = new CategoryDTO { CategoryId = 1, Name = "New Name" };
+            var updatedCategory = new Category { CategoryId = 1, Name = "New Name" };
 
-            var categoryService = new CategoryService(_mockCategoryRepository.Object, _mockUnitOfWork.Object, _mockMapper.Object, _loggerMock.Object);
+            _mockCategoryRepository.Setup(repo => repo.GetCategoryByIdAsync(1)).ReturnsAsync(existingCategory);
+            _mockMapper.Setup(m => m.Map(categoryDto, existingCategory)).Callback(() =>
+            {
+                existingCategory.Name = updatedCategory.Name;
+            });
 
             // Act
-            await categoryService.UpdateCategoryAsync(categoryDto);
+            await _categoryService.UpdateCategoryAsync(1, categoryDto);
 
             // Assert
-            _mockCategoryRepository.Verify(repo => repo.UpdateCategoryAsync(It.Is<Category>(c => c.CategoryId == 1 && c.Name == "Updated Name")), Times.Once);
-            _mockUnitOfWork.Verify(uow => uow.CompleteAsync(), Times.Once);
+            _mockCategoryRepository.Verify(repo => repo.UpdateCategoryAsync(existingCategory), Times.Once);
         }
 
         [Fact]
-        public async Task DeleteCategoryAsync_Should_Delete_Category()
+        public async Task UpdateCategoryAsync_ThrowsKeyNotFoundException()
         {
             // Arrange
-            int categoryId = 1;
+            _mockCategoryRepository.Setup(repo => repo.GetCategoryByIdAsync(1)).ReturnsAsync((Category)null);
 
-            var categoryService = new CategoryService(_mockCategoryRepository.Object, _mockUnitOfWork.Object, _mockMapper.Object, _loggerMock.Object);
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _categoryService.UpdateCategoryAsync(1, new CategoryDTO()));
+        }
 
+        [Fact]
+        public async Task DeleteCategoryAsync_DeletesCategory()
+        {
             // Act
-            await categoryService.DeleteCategoryAsync(categoryId);
+            await _categoryService.DeleteCategoryAsync(1);
 
             // Assert
-            _mockCategoryRepository.Verify(repo => repo.DeleteCategoryAsync(categoryId), Times.Once);
-            _mockUnitOfWork.Verify(uow => uow.CompleteAsync(), Times.Once);
+            _mockCategoryRepository.Verify(repo => repo.DeleteCategoryAsync(1), Times.Once);
         }
+
     }
 }

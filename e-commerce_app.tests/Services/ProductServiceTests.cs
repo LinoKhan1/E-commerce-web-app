@@ -16,147 +16,125 @@ namespace e_commerce_app.tests.Services
 {
     public class ProductServiceTests
     {
-        private readonly Mock<IProductRepository> _repositoryMock;
-        private readonly Mock<IUnitOfWork> _unitOfWorkMock;
-        private readonly IMapper _mapper;
-        private readonly Mock<ILogger<ProductService>> _loggerMock;
+        private readonly Mock<IProductRepository> _mockProductRepository;
+        private readonly Mock<IMapper> _mockMapper;
+        private readonly Mock<ILogger<ProductService>> _mockLogger;
+        private readonly ProductService _productService;
 
         public ProductServiceTests()
         {
-            _repositoryMock = new Mock<IProductRepository>();
-            _unitOfWorkMock = new Mock<IUnitOfWork>();
-            _loggerMock = new Mock<ILogger<ProductService>>();
+            _mockProductRepository = new Mock<IProductRepository>();
+            _mockMapper = new Mock<IMapper>();
+            _mockLogger = new Mock<ILogger<ProductService>>();
+            _productService = new ProductService(_mockProductRepository.Object, _mockMapper.Object, _mockLogger.Object);
+        }
 
-            // AutoMapper configurations for test
-            var mapperConfig = new MapperConfiguration(cfg =>
+        [Fact]
+        public async Task GetAllProductsAsync_ReturnsProducts()
+        {
+            // Arrange
+            var products = new List<Product> { new Product { ProductId = 1, Name = "Product 1" } };
+            var productDtos = new List<ProductDTO> { new ProductDTO { ProductId = 1, Name = "Product 1" } };
+
+            _mockProductRepository.Setup(repo => repo.GetAllProductsAsync()).ReturnsAsync(products);
+            _mockMapper.Setup(m => m.Map<IEnumerable<ProductDTO>>(products)).Returns(productDtos);
+
+            // Act
+            var result = await _productService.GetAllProductsAsync();
+
+            // Assert
+            Assert.Equal(productDtos, result);
+        }
+
+        [Fact]
+        public async Task GetProductByIdAsync_ReturnsProduct()
+        {
+            // Arrange
+            var product = new Product { ProductId = 1, Name = "Product 1" };
+            var productDto = new ProductDTO { ProductId = 1, Name = "Product 1" };
+
+            _mockProductRepository.Setup(repo => repo.GetProductByIdAsync(1)).ReturnsAsync(product);
+            _mockMapper.Setup(m => m.Map<ProductDTO>(product)).Returns(productDto);
+
+            // Act
+            var result = await _productService.GetProductByIdAsync(1);
+
+            // Assert
+            Assert.Equal(productDto, result);
+        }
+
+        [Fact]
+        public async Task GetProductByIdAsync_ThrowsKeyNotFoundException()
+        {
+            // Arrange
+            _mockProductRepository.Setup(repo => repo.GetProductByIdAsync(1)).ReturnsAsync((Product)null);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _productService.GetProductByIdAsync(1));
+        }
+
+        [Fact]
+        public async Task AddProductAsync_AddsProduct()
+        {
+            // Arrange
+            var productDto = new ProductDTO { ProductId = 1, Name = "Product 1" };
+            var product = new Product { ProductId = 1, Name = "Product 1" };
+
+            _mockMapper.Setup(m => m.Map<Product>(productDto)).Returns(product);
+
+            // Act
+            await _productService.AddProductAsync(productDto);
+
+            // Assert
+            _mockProductRepository.Verify(repo => repo.AddProductAsync(product), Times.Once);
+        }
+
+        [Fact]
+        public async Task AddProductAsync_ThrowsArgumentNullException()
+        {
+            // Act & Assert
+            await Assert.ThrowsAsync<ArgumentNullException>(() => _productService.AddProductAsync(null));
+        }
+
+        [Fact]
+        public async Task UpdateProductAsync_UpdatesProduct()
+        {
+            // Arrange
+            var existingProduct = new Product { ProductId = 1, Name = "Old Name" };
+            var productDto = new ProductDTO { ProductId = 1, Name = "New Name" };
+            var updatedProduct = new Product { ProductId = 1, Name = "New Name" };
+
+            _mockProductRepository.Setup(repo => repo.GetProductByIdAsync(1)).ReturnsAsync(existingProduct);
+            _mockMapper.Setup(m => m.Map(productDto, existingProduct)).Callback(() =>
             {
-                cfg.AddProfile(new AutoMapperProfile()); // Register the AutoMapperProfile
+                existingProduct.Name = updatedProduct.Name;
             });
 
-            _mapper = mapperConfig.CreateMapper();
-        }
-
-
-        /// <summary>
-        /// Tests GetAllProductsAsync method of ProductService.
-        /// </summary>
-        [Fact]
-        public async Task GetAllProductAsync_Should_Return_All_Products()
-        {
-            // Arrange
-            var products = new List<Product>
-            {
-                new Product {Id = 1, Name = "Product 1", Description = "Test Description 1", Price = 10.0m, Stock = 50 },
-                new Product {Id = 2, Name = "Product 2", Description = "Test Description 2", Price = 15.0m, Stock = 50 }
-            };
-
-            _repositoryMock.Setup(repo => repo.GetAllProductsAsync()).ReturnsAsync(products);
-
-            var productService = new ProductService(_repositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object, _mapper);
-
             // Act
-            var result = await productService.GetProductsAsync();
+            await _productService.UpdateProductAsync(1, productDto);
 
             // Assert
-            Assert.NotNull(result);
-            Assert.Equal(2, result.Count());
-
-            // Additional assertions to verify properties of ProductDTO
-            Assert.Collection(result,
-                item =>
-                {
-                    Assert.Equal(1, item.Id);
-                    Assert.Equal("Product 1", item.Name);
-                    Assert.Equal(10.0m, item.Price);
-                    // Add more assertions for other properties if needed
-                },
-                item =>
-                {
-                    Assert.Equal(2, item.Id);
-                    Assert.Equal("Product 2", item.Name);
-                    Assert.Equal(15.0m, item.Price);
-                    // Add more assertions for other properties if needed
-                });
-
-
-        }
-
-        /// <summary>
-        /// Tests GetProductByIdAsync method of ProductService.
-        /// </summary>
-        [Fact]
-        public async Task GetProductByIdAsync_Should_Return_Correct_Product()
-        {
-            // Arrange
-            int productId = 1;
-            var product = new Product { Id = productId, Name = "Product 1", Price = 10.0m };
-            _repositoryMock.Setup(repo => repo.GetProductByIdAsync(productId)).ReturnsAsync(product);
-
-            var productService = new ProductService(_repositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object, _mapper);
-
-            // Act
-            var result = await productService.GetProductByIdAsync(productId);
-
-            // Assert
-            Assert.NotNull(result);
-            Assert.Equal(productId, result.Id);
-            Assert.Equal("Product 1", result.Name);
-            Assert.Equal(10.0m, result.Price);
-
+            _mockProductRepository.Verify(repo => repo.UpdateProductAsync(existingProduct), Times.Once);
         }
 
         [Fact]
-        public async Task AddProductAsync_Should_Add_Product()
+        public async Task UpdateProductAsync_ThrowsKeyNotFoundException()
         {
             // Arrange
-            var productDto = new ProductDTO { Name = "New Product", Price = 20.0m };
-            var product = new Product { Id = 1, Name = "New Product", Price = 20.0m };
-            _repositoryMock.Setup(repo => repo.AddProductAsync(It.IsAny<Product>())).Returns(Task.CompletedTask);
+            _mockProductRepository.Setup(repo => repo.GetProductByIdAsync(1)).ReturnsAsync((Product)null);
 
-            var productService = new ProductService(_repositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object, _mapper);
-
-            // Act
-            await productService.AddProductAsync(productDto);
-
-            // Assert
-            _repositoryMock.Verify(repo => repo.AddProductAsync(It.Is<Product>(p => p.Name == product.Name && p.Price == product.Price)), Times.Once);
-            _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Once);
+            // Act & Assert
+            await Assert.ThrowsAsync<KeyNotFoundException>(() => _productService.UpdateProductAsync(1, new ProductDTO()));
         }
 
         [Fact]
-        public async Task UpdateProductAsync_Should_Update_Product()
+        public async Task DeleteProductAsync_DeletesProduct()
         {
-            // Arrange
-            var productDto = new ProductDTO { Id = 1, Name = "Updated Product", Price = 25.0m };
-            var product = new Product { Id = 1, Name = "Updated Product", Price = 25.0m };
-            _repositoryMock.Setup(repo => repo.UpdateProductAsync(It.IsAny<Product>())).Returns(Task.CompletedTask);
-
-            var productService = new ProductService(_repositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object, _mapper);
-
             // Act
-            await productService.UpdateProductAsync(productDto);
+            await _productService.DeleteProductAsync(1);
 
             // Assert
-            _repositoryMock.Verify(repo => repo.UpdateProductAsync(It.Is<Product>(p => p.Id == product.Id && p.Name == product.Name && p.Price == product.Price)), Times.Once);
-            _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Once);
+            _mockProductRepository.Verify(repo => repo.DeleteProductAsync(1), Times.Once);
         }
-
-        [Fact]
-        public async Task DeleteProductAsync_Should_Delete_Product()
-        {
-            // Arrange
-            int productId = 1;
-            _repositoryMock.Setup(repo => repo.DeleteProductAsync(productId)).Returns(Task.CompletedTask);
-
-            var productService = new ProductService(_repositoryMock.Object, _unitOfWorkMock.Object, _loggerMock.Object, _mapper);
-
-            // Act
-            await productService.DeleteProductAsync(productId);
-
-            // Assert
-            _repositoryMock.Verify(repo => repo.DeleteProductAsync(productId), Times.Once);
-            _unitOfWorkMock.Verify(uow => uow.CompleteAsync(), Times.Once);
-        }
-
     }
 }

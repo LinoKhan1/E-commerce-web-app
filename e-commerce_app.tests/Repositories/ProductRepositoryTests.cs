@@ -54,7 +54,7 @@ namespace e_commerce_app.tests.Repositories
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(1, result.Id);
+            Assert.Equal(1, result.ProductId);
             Assert.Equal("Laptop", result.Name);
         }
 
@@ -80,7 +80,7 @@ namespace e_commerce_app.tests.Repositories
             // Arrange
             var newProduct = new Product
             {
-                Id = 4,
+                ProductId = 4,
                 Name = "Tablet",
                 Description = "A new tablet",
                 Price = 25000,

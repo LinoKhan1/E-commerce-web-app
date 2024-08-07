@@ -2,6 +2,7 @@
 using e_commerce_app.Server.Infrastructure.Data;
 using e_commerce_app.Server.Infrastructure.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace e_commerce_app.Server.Infrastructure.Repositories
 {
@@ -12,20 +13,19 @@ namespace e_commerce_app.Server.Infrastructure.Repositories
 
         public CategoryRepository(ApplicationDbContext context, ILogger<CategoryRepository> logger)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _context = context;
+            _logger = logger;
         }
 
         public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
         {
             try
             {
-                _logger.LogInformation("Fetching all categories from the database.");
                 return await _context.Categories.ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while fetching categories.");
+                _logger.LogError(ex, "Error occurred while retrieving categories.");
                 throw;
             }
         }
@@ -34,59 +34,39 @@ namespace e_commerce_app.Server.Infrastructure.Repositories
         {
             try
             {
-                _logger.LogInformation("Fetching category with ID {CategoryId} from the database.", categoryId);
-                var category = await _context.Categories.FindAsync(categoryId);
-
-                if (category == null)
-                {
-                    _logger.LogWarning("Category with ID {CategoryId} not found.", categoryId);
-                }
-
-                return category;
+                return await _context.Categories.FindAsync(categoryId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while fetching the category with ID {CategoryId}.", categoryId);
+                _logger.LogError(ex, $"Error occurred while retrieving category with ID {categoryId}.");
                 throw;
             }
         }
 
         public async Task AddCategoryAsync(Category category)
         {
-            if (category == null)
-            {
-                throw new ArgumentNullException(nameof(category));
-            }
-
             try
             {
-                _logger.LogInformation("Adding a new category to the database.");
-                await _context.Categories.AddAsync(category);
+                _context.Categories.Add(category);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while adding the category.");
+                _logger.LogError(ex, "Error occurred while adding a new category.");
                 throw;
             }
         }
 
         public async Task UpdateCategoryAsync(Category category)
         {
-            if (category == null)
-            {
-                throw new ArgumentNullException(nameof(category));
-            }
-
             try
             {
-                _logger.LogInformation("Updating category with ID {CategoryId} in the database.", category.CategoryId);
                 _context.Categories.Update(category);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while updating the category with ID {CategoryId}.", category.CategoryId);
+                _logger.LogError(ex, $"Error occurred while updating category with ID {category.CategoryId}.");
                 throw;
             }
         }
@@ -96,19 +76,14 @@ namespace e_commerce_app.Server.Infrastructure.Repositories
             try
             {
                 var category = await _context.Categories.FindAsync(categoryId);
-                if (category == null)
-                {
-                    _logger.LogWarning("Category with ID {CategoryId} not found for deletion.", categoryId);
-                    return;
-                }
+                if (category == null) throw new KeyNotFoundException($"Category with ID {categoryId} not found.");
 
-                _logger.LogInformation("Deleting category with ID {CategoryId} from the database.", categoryId);
                 _context.Categories.Remove(category);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while deleting the category with ID {CategoryId}.", categoryId);
+                _logger.LogError(ex, $"Error occurred while deleting category with ID {categoryId}.");
                 throw;
             }
         }

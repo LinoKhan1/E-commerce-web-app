@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Identity;
 
 namespace e_commerce_app.Server.Core.Services
 {
-    public class UserService
+    public class UserService : IUserService
     {
         private readonly UserManager<User> _userManager;
         private readonly IJwtAuthService _jwtAuthService;

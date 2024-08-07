@@ -34,9 +34,9 @@ namespace e_commerce_app.tests.Repositories.Configuration
 
             var products = new List<Product>
         {
-            new Product {Id = 1, Name ="Laptop", Description="Test Description", Price=35099, Stock=50, CategoryId=1, Category = categories[0]},
-            new Product {Id = 2, Name = "Smartphone", Description="Test Description", Price=35099, Stock=50, CategoryId= 1, Category = categories[0]},
-            new Product {Id = 3, Name = "Novel", Description="Test Description", Price=349, Stock=50, CategoryId=2, Category = categories[1]}
+            new Product {ProductId = 1, Name ="Laptop", Description="Test Description", Price=35099, Stock=50, CategoryId=1, Category = categories[0]},
+            new Product {ProductId = 2, Name = "Smartphone", Description="Test Description", Price=35099, Stock=50, CategoryId= 1, Category = categories[0]},
+            new Product {ProductId = 3, Name = "Novel", Description="Test Description", Price=349, Stock=50, CategoryId=2, Category = categories[1]}
         };
             var cartItems = new List<CartItem>
             {

@@ -9,15 +9,18 @@ namespace e_commerce_app.Server.Infrastructure.unitOfWork
         private readonly ApplicationDbContext _context;
         private IProductRepository _productRepository;
         private ICategoryRepository _categoryRepository;
-
+        private ICartRepository _cartRepository;
+        private bool disposedValue;
         private readonly ILogger<ProductRepository> _logger;
         private readonly ILogger<CategoryRepository> _loggerCategory;
+        private readonly ILogger<CartRepository> _loggerCart;
 
-        public UnitOfWork(ApplicationDbContext context, ILogger<ProductRepository> logger, ILogger<CategoryRepository> loggerCategory)
+        public UnitOfWork(ApplicationDbContext context, ILogger<ProductRepository> logger, ILogger<CategoryRepository> loggerCategory, ILogger<CartRepository> loggerCart)
         {
             _context = context;
             _logger = logger;
             _loggerCategory = loggerCategory;
+            _loggerCart = loggerCart;
         }
 
         public IProductRepository ProductRepository
@@ -45,15 +48,51 @@ namespace e_commerce_app.Server.Infrastructure.unitOfWork
             }
         }
 
+        public ICartRepository CartRepository
+        {
+            get
+            {
+                if (_cartRepository == null)
+                {
+                    _cartRepository = new CartRepository(_context, _loggerCart);
+                }
+                return _cartRepository; 
+            }
+        }
+
 
         public Task<int> CompleteAsync()
         {
             throw new NotImplementedException();
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    // TODO: dispose managed state (managed objects)
+                }
+
+                // TODO: free unmanaged resources (unmanaged objects) and override finalizer
+                // TODO: set large fields to null
+                disposedValue = true;
+            }
+        }
+
+        // // TODO: override finalizer only if 'Dispose(bool disposing)' has code to free unmanaged resources
+        // ~UnitOfWork()
+        // {
+        //     // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+        //     Dispose(disposing: false);
+        // }
+
         public void Dispose()
         {
-            throw new NotImplementedException();
+            // Do not change this code. Put cleanup code in 'Dispose(bool disposing)' method
+            Dispose(disposing: true);
+            GC.SuppressFinalize(this);
         }
     }
 }

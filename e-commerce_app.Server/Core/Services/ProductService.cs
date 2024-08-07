@@ -11,20 +11,17 @@ namespace e_commerce_app.Server.Core.Services
     {
 
         private readonly IProductRepository _productRepository;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly ILogger<ProductService> _logger;
         private readonly IMapper _mapper;
+        private readonly ILogger<ProductService> _logger;
 
-
-        public ProductService(IProductRepository productRepository, IUnitOfWork unitOfWork, ILogger<ProductService> logger, IMapper mapper)
+        public ProductService(IProductRepository productRepository, IMapper mapper, ILogger<ProductService> logger)
         {
             _productRepository = productRepository;
-            _unitOfWork = unitOfWork;
-            _logger = logger;
             _mapper = mapper;
+            _logger = logger;
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetProductsAsync()
+        public async Task<IEnumerable<ProductDTO>> GetAllProductsAsync()
         {
             try
             {
@@ -33,8 +30,8 @@ namespace e_commerce_app.Server.Core.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while getting all products.");
-                throw new ApplicationException("An error occurred while getting all products.", ex);
+                _logger.LogError(ex, "Error occurred while retrieving products.");
+                throw;
             }
         }
 
@@ -43,12 +40,13 @@ namespace e_commerce_app.Server.Core.Services
             try
             {
                 var product = await _productRepository.GetProductByIdAsync(productId);
+                if (product == null) throw new KeyNotFoundException($"Product with ID {productId} not found.");
                 return _mapper.Map<ProductDTO>(product);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while getting the product with ID {productId}.");
-                throw new ApplicationException($"An error occurred while getting the product with ID {productId}.", ex);
+                _logger.LogError(ex, $"Error occurred while retrieving product with ID {productId}.");
+                throw;
             }
         }
 
@@ -56,29 +54,36 @@ namespace e_commerce_app.Server.Core.Services
         {
             try
             {
+                if (productDto == null)
+                {
+                    _logger.LogWarning("AddProductAsync: ProductDTO is null.");
+                    throw new ArgumentNullException(nameof(productDto));
+                }
+
                 var product = _mapper.Map<Product>(productDto);
                 await _productRepository.AddProductAsync(product);
-                await _unitOfWork.CompleteAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while adding a new product.");
-                throw new ApplicationException("An error occurred while adding a new product.", ex);
+                _logger.LogError(ex, "Error occurred while adding a new product.");
+                throw; // Rethrow to handle at the controller level
             }
         }
 
-        public async Task UpdateProductAsync(ProductDTO productDto)
+        public async Task UpdateProductAsync(int productId, ProductDTO productDto)
         {
             try
             {
-                var product = _mapper.Map<Product>(productDto);
-                await _productRepository.UpdateProductAsync(product);
-                await _unitOfWork.CompleteAsync();
+                var existingProduct = await _productRepository.GetProductByIdAsync(productId);
+                if (existingProduct == null) throw new KeyNotFoundException($"Product with ID {productId} not found.");
+
+                _mapper.Map(productDto, existingProduct);
+                await _productRepository.UpdateProductAsync(existingProduct);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while updating the product with ID {productDto.Id}.");
-                throw new ApplicationException($"An error occurred while updating the product with ID {productDto.Id}.", ex);
+                _logger.LogError(ex, $"Error occurred while updating product with ID {productId}.");
+                throw;
             }
         }
 
@@ -87,12 +92,11 @@ namespace e_commerce_app.Server.Core.Services
             try
             {
                 await _productRepository.DeleteProductAsync(productId);
-                await _unitOfWork.CompleteAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while deleting the product with ID {productId}.");
-                throw new ApplicationException($"An error occurred while deleting the product with ID {productId}.", ex);
+                _logger.LogError(ex, $"Error occurred while deleting product with ID {productId}.");
+                throw;
             }
         }
     }

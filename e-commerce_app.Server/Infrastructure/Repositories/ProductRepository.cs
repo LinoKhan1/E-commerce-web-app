@@ -12,35 +12,33 @@ namespace e_commerce_app.Server.Infrastructure.Repositories
 
         public ProductRepository(ApplicationDbContext context, ILogger<ProductRepository> logger)
         {
-            _context = context ?? throw new ArgumentNullException(nameof(context));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _context = context;
+            _logger = logger;
         }
-
 
         public async Task<IEnumerable<Product>> GetAllProductsAsync()
         {
             try
             {
-                _logger.LogInformation("Retrieving all products from the database.");
                 return await _context.Products.Include(p => p.Category).ToListAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while retrieving all products.");
+                _logger.LogError(ex, "Error occurred while retrieving products.");
                 throw;
             }
         }
 
-        public async Task<Product> GetProductByIdAsync(int id)
+        public async Task<Product> GetProductByIdAsync(int productId)
         {
             try
             {
-                _logger.LogInformation($"Retrieving product with ID {id} from the database.");
-                return await _context.Products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id);
+                return await _context.Products.Include(p => p.Category)
+                                             .FirstOrDefaultAsync(p => p.ProductId == productId);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while retrieving the product with ID {id}.");
+                _logger.LogError(ex, $"Error occurred while retrieving product with ID {productId}.");
                 throw;
             }
         }
@@ -49,17 +47,12 @@ namespace e_commerce_app.Server.Infrastructure.Repositories
         {
             try
             {
-                if (product == null)
-                {
-                    throw new ArgumentNullException(nameof(product));
-                }
-
-                _logger.LogInformation("Adding a new product to the database.");
-                await _context.Products.AddAsync(product);
+                _context.Products.Add(product);
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "An error occurred while adding a new product.");
+                _logger.LogError(ex, "Error occurred while adding a new product.");
                 throw;
             }
         }
@@ -68,17 +61,12 @@ namespace e_commerce_app.Server.Infrastructure.Repositories
         {
             try
             {
-                if (product == null)
-                {
-                    throw new ArgumentNullException(nameof(product));
-                }
-
-                _logger.LogInformation($"Updating product with ID {product.Id} in the database.");
+                _context.Products.Update(product);
                 await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while updating the product with ID {product.Id}.");
+                _logger.LogError(ex, $"Error occurred while updating product with ID {product.ProductId}.");
                 throw;
             }
         }
@@ -87,16 +75,15 @@ namespace e_commerce_app.Server.Infrastructure.Repositories
         {
             try
             {
-                _logger.LogInformation($"Deleting product with ID {productId} from the database.");
                 var product = await _context.Products.FindAsync(productId);
-                if (product != null)
-                {
-                    _context.Products.Remove(product);
-                }
+                if (product == null) throw new KeyNotFoundException($"Product with ID {productId} not found.");
+
+                _context.Products.Remove(product);
+                await _context.SaveChangesAsync();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while deleting the product with ID {productId}.");
+                _logger.LogError(ex, $"Error occurred while deleting product with ID {productId}.");
                 throw;
             }
         }

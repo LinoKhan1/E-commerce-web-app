@@ -10,7 +10,7 @@ namespace e_commerce_app.Server.APIs.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
-        private readonly ILogger _logger;
+        private readonly ILogger<AuthController> _logger;
         /// <summary>
         /// Initializes a new instance of the <see cref="AuthController"/> class.
         /// </summary>
