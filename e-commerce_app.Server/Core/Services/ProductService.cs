@@ -35,6 +35,19 @@ namespace e_commerce_app.Server.Core.Services
             }
         }
 
+        public async Task<IEnumerable<ProductDTO>> GetProductsAsync(int limit, int offset)
+        {
+            try
+            {
+                var products = await _productRepository.GetProductsAsync(limit, offset);
+                return _mapper.Map<IEnumerable<ProductDTO>>(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred while retrieving products.");
+                throw;
+            }
+        }
         public async Task<ProductDTO> GetProductByIdAsync(int productId)
         {
             try
@@ -46,6 +59,19 @@ namespace e_commerce_app.Server.Core.Services
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error occurred while retrieving product with ID {productId}.");
+                throw;
+            }
+        }
+        public async Task<IEnumerable<ProductDTO>> GetProductsByCategoryAsync(int categoryId)
+        {
+            try
+            {
+                var products = await _productRepository.GetProductsByCategoryAsync(categoryId);
+                return _mapper.Map<IEnumerable<ProductDTO>>(products);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while retrieving products for category ID {categoryId}.");
                 throw;
             }
         }

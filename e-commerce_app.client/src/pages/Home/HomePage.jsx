@@ -1,4 +1,5 @@
 import React from 'react';
+import useCategories from '../../hooks/useCategories';
 
 // Styles and CSS
 import './Home.scss';
@@ -6,6 +7,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 
 const Home = () => {
+    const { categories, loading, error } = useCategories();
+    if (loading) return <p>Loading categories...</p>;
+    if (error) return <p>Error loading categories: {error.message}</p>;
     return (
         /* Home Page Component */
         <div className="home">
@@ -29,6 +33,11 @@ const Home = () => {
             {/** Category Section */}
             <div className="category-section">
                 <section className="section">
+                    <ul>
+                        {categories.map((category) => (
+                            <li key={category.id}>{category.name}</li>
+                        ))}
+                    </ul>
                     <div className="row">
                         <div className="col">
                             <button>
@@ -46,18 +55,14 @@ const Home = () => {
                             <button>
                                 Lorem Ipsum
                             </button>
-
                         </div>
                         <div className="col">
                             <button>
                                 Lorem Ipsum
                             </button>
-
-
                         </div>
                     </div>
                 </section>
-
             </div>
             {/* Featured Product Section*/}
             <div className="featured-product-section">

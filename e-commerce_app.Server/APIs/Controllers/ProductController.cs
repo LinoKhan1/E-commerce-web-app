@@ -35,6 +35,8 @@ namespace e_commerce_app.Server.APIs.Controllers
             }
         }
 
+       
+
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductDTO>> GetProduct(int id)
         {
@@ -54,6 +56,15 @@ namespace e_commerce_app.Server.APIs.Controllers
                 return StatusCode(500, "Internal server error");
             }
         }
+
+
+        [HttpGet("category/{categoryId}")]
+        public async Task<ActionResult<IEnumerable<ProductDTO>>> GetProductsByCategory(int categoryId)
+        {
+            var products = await _productService.GetProductsByCategoryAsync(categoryId);
+            return Ok(products);
+        }
+
 
         [HttpPost]
         public async Task<ActionResult> CreateProduct(ProductDTO productDto)

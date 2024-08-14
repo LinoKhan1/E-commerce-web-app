@@ -28,7 +28,13 @@ namespace e_commerce_app.Server.Infrastructure.Repositories
                 throw;
             }
         }
-
+        public async Task<IEnumerable<Product>> GetProductsAsync(int limit, int offset)
+        {
+            return await _context.Products
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+        }
         public async Task<Product> GetProductByIdAsync(int productId)
         {
             try
@@ -41,6 +47,20 @@ namespace e_commerce_app.Server.Infrastructure.Repositories
                 _logger.LogError(ex, $"Error occurred while retrieving product with ID {productId}.");
                 throw;
             }
+        }
+
+        public async Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId)
+        {
+            try
+            {
+                return await _context.Products
+               .Where(p => p.CategoryId == categoryId).ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occured while retrieving product by CatogoryId {categoryId}");
+                throw;
+            }    
         }
 
         public async Task AddProductAsync(Product product)
