@@ -35,19 +35,7 @@ namespace e_commerce_app.Server.Core.Services
             }
         }
 
-        public async Task<IEnumerable<ProductDTO>> GetProductsAsync(int limit, int offset)
-        {
-            try
-            {
-                var products = await _productRepository.GetProductsAsync(limit, offset);
-                return _mapper.Map<IEnumerable<ProductDTO>>(products);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while retrieving products.");
-                throw;
-            }
-        }
+       
         public async Task<ProductDTO> GetProductByIdAsync(int productId)
         {
             try

@@ -12,10 +12,7 @@
     <Folder Include="src\api\" />
     <Folder Include="src\components\common\" />
     <Folder Include="src\components\cart\" />
-    <Folder Include="src\components\category\" />
     <Folder Include="src\components\auth\" />
-    <Folder Include="src\components\product\" />
-    <Folder Include="src\hooks\" />
     <Folder Include="src\utils\" />
   </ItemGroup>
 </Project>

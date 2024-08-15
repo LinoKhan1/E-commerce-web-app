@@ -8,7 +8,6 @@ namespace e_commerce_app.Server.Core.Services.Interfaces
     {
         Task<IEnumerable<ProductDTO>> GetAllProductsAsync();
         Task<ProductDTO> GetProductByIdAsync(int productId);
-        Task<IEnumerable<ProductDTO>> GetProductsAsync(int limit, int offset);
         Task<IEnumerable<ProductDTO>> GetProductsByCategoryAsync(int categoryId);   
         Task AddProductAsync(ProductDTO productDto);
         Task UpdateProductAsync(int productId, ProductDTO productDto);

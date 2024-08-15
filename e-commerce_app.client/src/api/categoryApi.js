@@ -6,7 +6,7 @@ import apiClient from './apiClient';
  */
 export const getCategories = async () => {
   try {
-    const response = await apiClient.get('/category');
+    const response = await apiClient.get('api/category');
     return response.data;
   } catch (error) {
     console.error('Error fetching categories:', error);

@@ -1,0 +1,49 @@
+# Visual Studio
+.vscode/
+.vs/
+.idea/
+
+# User-specific files
+*.rsuser
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+
+# ASP.NET Core
+bin/
+obj/
+out/
+*.dbmdl
+*.bak
+*.log
+*.pdb
+
+# Entity Framework Core Migrations
+Migrations/
+
+# Packages
+packages/
+.nuget/
+*.nupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+*.tlog
+*.ide.log
+*.trace
+
+# Published output
+publish/
+wwwroot/
+
+# System-specific files
+Thumbs.db
+.DS_Store

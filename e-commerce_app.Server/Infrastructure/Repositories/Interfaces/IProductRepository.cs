@@ -9,7 +9,6 @@ namespace e_commerce_app.Server.Infrastructure.Repositories.Interfaces
         Task<Product> GetProductByIdAsync(int productId);
 
         Task<IEnumerable<Product>> GetProductsByCategoryAsync(int categoryId);
-        Task<IEnumerable<Product>> GetProductsAsync(int limit, int offset);
         Task AddProductAsync(Product product);
         Task UpdateProductAsync(Product product);
         Task DeleteProductAsync(int productId);

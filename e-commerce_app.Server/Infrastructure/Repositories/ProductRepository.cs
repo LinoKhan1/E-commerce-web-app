@@ -28,13 +28,7 @@ namespace e_commerce_app.Server.Infrastructure.Repositories
                 throw;
             }
         }
-        public async Task<IEnumerable<Product>> GetProductsAsync(int limit, int offset)
-        {
-            return await _context.Products
-                .Skip(offset)
-                .Take(limit)
-                .ToListAsync();
-        }
+       
         public async Task<Product> GetProductByIdAsync(int productId)
         {
             try

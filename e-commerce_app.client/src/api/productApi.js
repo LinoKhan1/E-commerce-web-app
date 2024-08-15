@@ -4,14 +4,14 @@ import apiClient from './apiClient';
  * Fetch all products.
  * @returns {Promise<Object[]>} - Promise resolving to an array of products.
  */
-export const getProducts = async () => {
-  try {
-    const response = await apiClient.get('/product');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching products:', error);
-    throw error;
-  }
+export const getProducts = async (params = {}) => {
+    try {
+        const response = await apiClient.get('api/product', { params });
+        return response.data;
+    } catch (error) {
+        console.error('Error fetching products:', error);
+        throw error;
+    }
 };
 
 /**
@@ -21,7 +21,7 @@ export const getProducts = async () => {
  */
 export const getProductById = async (id) => {
   try {
-    const response = await apiClient.get(`/product/${id}`);
+    const response = await apiClient.get(`api/product/${id}`);
     return response.data;
   } catch (error) {
     console.error(`Error fetching product with ID ${id}:`, error);
@@ -35,16 +35,15 @@ export const getProductById = async (id) => {
  * @returns {Promise<Object[]>} - Promise resolving to an array of products.
  */
 export const getProductsByCategory = async (categoryId) => {
-  try {
-    const response = await apiClient.get('/product/category', {
-      params: { categoryId },
-    });
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching products from category ${categoryId}:`, error);
-    throw error;
-  }
+    try {
+        const response = await apiClient.get(`/api/product/category/${categoryId}`);
+        return response.data;
+    } catch (error) {
+        console.error(`Error fetching products from category ${categoryId}:`, error);
+        throw error;
+    }
 };
+
 
 /**
  * Create a new product.
@@ -53,7 +52,7 @@ export const getProductsByCategory = async (categoryId) => {
  */
 export const createProduct = async (productData) => {
   try {
-    const response = await apiClient.post('/product', productData);
+    const response = await apiClient.post('api/product', productData);
     return response.data;
   } catch (error) {
     console.error('Error creating product:', error);
@@ -69,7 +68,7 @@ export const createProduct = async (productData) => {
  */
 export const updateProduct = async (id, productData) => {
   try {
-    const response = await apiClient.put(`/product/${id}`, productData);
+    const response = await apiClient.put(`api/product/${id}`, productData);
     return response.data;
   } catch (error) {
     console.error(`Error updating product with ID ${id}:`, error);
@@ -84,7 +83,7 @@ export const updateProduct = async (id, productData) => {
  */
 export const deleteProduct = async (id) => {
   try {
-    await apiClient.delete(`/products/${id}`);
+    await apiClient.delete(`api/products/${id}`);
   } catch (error) {
     console.error(`Error deleting product with ID ${id}:`, error);
     throw error;
