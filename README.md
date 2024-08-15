@@ -6,12 +6,12 @@ This is a full-stack e-commerce application built with React.js for the frontend
 
 ### Frontend
 - **Framework**: React.js, Vite
-- **State Management**: Redux or Context API
+- **State Management**: Context API, Custom Hooks
 - **Routing**: React Router
 - **Form Handling**: Formik with Yup for validation
 - **Testing**: Jest, Supertest
 - **Styling**: CSS Modules, SASS, Bootstrap
-- **API Requests**: Axios or Fetch API
+- **API Requests**: Axios
 
 ### Backend
 - **Framework**: ASP.NET Core
