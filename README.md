@@ -2,6 +2,26 @@
 
 This is a full-stack e-commerce application built with React.js for the frontend and ASP.NET Core Web API for the backend. It includes user management, product management, shopping cart functionality, checkout process with payment integration, order management, inventory management, notifications, content management, and security features.
 
+## Focus Areas
+
+● Implemented RESTful APIs using ASP.NET Core Web API for product management, shopping cart, user
+authentication, order processing, and more.
+● Secured endpoints using JWT tokens and ASP.NET Core Identity for user authentication and authorization.
+● Integrated PayPal SDKs for seamless order processing, checkout, and payment handling.
+● Managed data persistence using Microsoft SQL Server and Entity Framework Core for efficient data access and
+management.
+● Conducted backend testing with XUnit and Moq for unit and integration testing to ensure reliability and
+functionality.
+● Developed the frontend using React.js with Vite for fast module reloading and efficient bundling, ensuring a
+responsive and scalable user interface.
+● Frontend testing using Jest and Supertest to validate UI components and API interactions.
+● Implemented centralized API handling and state management: Utilized Axios for API requests, created modular
+API services for various resources (e.g., products, categories, carts), and abstracted data management and
+fetching logic into dedicated service files.
+● Developed Context and Hooks for scalable state management: Established Context providers to manage and
+share application state, used custom hooks to access and manipulate context data, and designed components
+to handle data fetching, loading, and error states efficiently.
+
 ## Technical Stack
 
 ### Frontend
