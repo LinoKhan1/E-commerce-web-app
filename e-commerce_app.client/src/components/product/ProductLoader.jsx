@@ -3,6 +3,7 @@ import useProducts from '../../hooks/useProduct';
 import Product_img from "../../assets/images/book.png";
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import './ProductGrid.scss';
 
 
 const ProductLoader = ({ categoryId = null }) => {

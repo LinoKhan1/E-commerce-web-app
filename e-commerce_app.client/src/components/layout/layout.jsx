@@ -1,25 +1,15 @@
 import React from 'react';
+import { Outlet} from "react-router-dom";
 
-import { Outlet, Link } from "react-router-dom";
-
+import Navbar from "./navbar.jsx";
+import Footer from "./footer.jsx";
 
 const Layout = () => {
     return (
         <>
-            <nav>
-                <ul>
-                    <li>
-                        <Link to="/">Home</Link>
-                    </li>
-                    <li>
-                        <Link to="products">Products</Link>
-                    </li>
-                    <li>
-                       <Link to="cart">Cart</Link>
-                    </li>
-                </ul>
-            </nav>
+            <Navbar />
             <Outlet />
+            <Footer/>
         </>
     )
 };

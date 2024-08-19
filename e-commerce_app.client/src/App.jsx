@@ -3,7 +3,7 @@ import React from 'react';
 import AppRoutes from './routes/AppRoutes';
 import Layout from './components/layout/layout.jsx';
 import Home from "./pages/Home/HomePage.jsx";
-import Products from "./pages/Product/ProductsPage.jsx"
+import Shop from "./pages/Product/ShopPage.jsx"
 import Cart from "./pages/Cart/CartPage.jsx";
 
 const App = () => {
@@ -13,7 +13,8 @@ const App = () => {
             <Routes>
                 <Route path="/" element={<Layout />}>
                     <Route index element={<Home />} />
-                    <Route path="products" element={<Products />} />
+                    <Route path="shop" element={<Shop />} />
+                    <Route path="shop/category/:categoryId" element={<Shop />} />
                     <Route path="cart" element={<Cart/>}/>
                 </Route>
             </Routes>
