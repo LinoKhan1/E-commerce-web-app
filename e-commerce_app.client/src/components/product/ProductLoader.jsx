@@ -1,10 +1,7 @@
 import React, { useEffect } from 'react';
 import useProducts from '../../hooks/useProduct';
-import Product_img from "../../assets/images/book.png";
-
 import 'bootstrap/dist/css/bootstrap.min.css';
 import './ProductGrid.scss';
-
 
 const ProductLoader = ({ categoryId = null }) => {
     const { products, getAllProducts, getProductsByCategory, loading } = useProducts();
@@ -20,22 +17,22 @@ const ProductLoader = ({ categoryId = null }) => {
     if (loading) return <div>Loading products...</div>;
 
     return (
-       
-            <div className="col-lg-3 col">
-                {products.length > 0 ? (
-                    products.map((product) => (
-                        <div key={product.id}>
-                            <img className="img-fluid" src={Product_img} alt="Product image" />
-                            <h3>{product.name}</h3>
-                            <p>Price: ${product.price}</p>
+        <div className="row">
+            {products.length > 0 ? (
+                products.map((product) => (
+                    <div key={product.id} className="col-lg-3 col-md-4 col-sm-6">
+                        <div className="product-card">
+                            <img src={product.imageUrl} alt={product.name} className="product-image" />
+                            <h3 className="product-name">{product.name}</h3>
+                            <p className="product-price">${product.price.toFixed(2)}</p>
                         </div>
-                    ))
-                ) : (
-                    <p>No products found.</p>
-                )}
-            </div>
-        
-        
+                    </div>
+                ))
+            ) : (
+                <p>No products found.</p>
+            )}
+        </div>
     );
 };
+
 export default ProductLoader;

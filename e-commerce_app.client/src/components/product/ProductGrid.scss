@@ -1,24 +1,30 @@
 .product-grid {
     display: flex;
     flex-wrap: wrap;
-    gap: 20px;
-    justify-content: space-between;
-}
-
-.product-item {
-    margin-bottom: 30px;
+    gap: 1rem; // Adjust the spacing between products as needed
 }
 
 .product-card {
-    background-color: #f9f9f9;
     border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 8px;
+    padding: 1rem;
+    border-radius: 0.5rem;
     text-align: center;
+    background-color: #fff;
 }
 
-.product-card img {
+.product-image {
     max-width: 100%;
     height: auto;
-    margin-bottom: 10px;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 0.5rem;
+}
+
+.product-name {
+    font-size: 1.25rem;
+    margin: 0.5rem 0;
+}
+
+.product-price {
+    font-size: 1rem;
+    color: #333;
 }

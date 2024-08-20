@@ -2,10 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import useCategories from '../../hooks/useCategories.jsx';
 import CategoryLoader from '../../components/category/CategoryLoader.jsx';
+import { ProductProvider } from '../../context/ProductContext.jsx';
+import ProductLoader from '../../components/product/ProductLoader.jsx';
 import './Shop.scss'; // Ensure you have the appropriate styles
 
 function CategoryList() {
-
     const { categoryId } = useParams(); // Get the category ID from the URL
     const { categories, loading, error } = useCategories();
 
@@ -16,7 +17,7 @@ function CategoryList() {
         <ul className="category-list">
             {categories.map((category) => (
                 <li key={category.id}>
-                    <Link to="/shop">
+                    <Link to={`/shop/category/${category.categoryId}`}>
                         {category.name}
                     </Link>
                 </li>
@@ -24,9 +25,10 @@ function CategoryList() {
         </ul>
     );
 }
+
 const ShopPage = () => {
-   
-    const [products, setProducts] = useState([]); // Will be populated with API data later
+    const { categoryId } = useParams(); // Get the category ID from the URL
+    console.log('categoryId:', categoryId);
     const [filters, setFilters] = useState({
         color: '',
         brand: '',
@@ -35,18 +37,13 @@ const ShopPage = () => {
     });
     const [sortOption, setSortOption] = useState('newest');
 
-    
-
-
     return (
         <div className="shop-page">
             <aside className="shop-sidebar">
                 <h3>Categories</h3>
                 <CategoryLoader>
-                    <CategoryList />      
+                    <CategoryList />
                 </CategoryLoader>
-               
-
                 <h3>Shop by Color</h3>
                 <div className="filter-section">
                     <label>
@@ -89,7 +86,7 @@ const ShopPage = () => {
                             min="0"
                             max="1000"
                             value={filters.priceRange}
-                            onChange={(e) => setFilters({ ...filters, priceRange: e.target.value })}
+                            onChange={(e) => setFilters({ ...filters, priceRange: [e.target.value] })}
                         />
                     </label>
                 </div>
@@ -114,7 +111,8 @@ const ShopPage = () => {
             <main className="shop-content">
                 <div className="shop-header">
                     <div className="items-found">
-                        {products.length} items found
+                        {/* Display the number of items found based on filters */}
+                        {/* {products.length} items found */}
                     </div>
                     <div className="sort-options">
                         <label>
@@ -131,19 +129,10 @@ const ShopPage = () => {
                         </label>
                     </div>
                 </div>
-
                 <div className="product-grid">
-                    {products.length > 0 ? (
-                        products.map((product) => (
-                            <div key={product.id} className="product-card">
-                                <img src={product.imageUrl} alt={product.name} />
-                                <h3>{product.name}</h3>
-                                <p>${product.price}</p>
-                            </div>
-                        ))
-                    ) : (
-                        <p>No products available in this category.</p>
-                    )}
+                    <ProductProvider>
+                        <ProductLoader categoryId={categoryId}/>
+                    </ProductProvider>
                 </div>
             </main>
         </div>
