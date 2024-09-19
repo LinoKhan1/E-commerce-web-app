@@ -1,3 +1,4 @@
+// src/services/cartService.js
 import { fetchCartItems, addCartItem, updateCartItem, removeCartItem } from "../api/cartApi";
 
 export const getCartItems = async () => {

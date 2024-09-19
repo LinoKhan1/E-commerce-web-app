@@ -1,5 +1,7 @@
+// src/pages/Cart/CartPage.jsx
 import React from "react";
 import CartLoader from "../../components/cart/CartLoader";
+import { CartProvider } from "../../context/CartContext";
 
 const CartPage = () => {
 
@@ -8,7 +10,9 @@ const CartPage = () => {
         <>
             <div className="cart-page">
                 <h1>Your Cart</h1>
-                <CartLoader />
+                <CartProvider>
+                    <CartLoader />
+                </CartProvider>
             </div>
         </>
     );

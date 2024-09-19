@@ -1,12 +1,13 @@
 import React, {useEffect} from "react";
 import useCart from "../../hooks/useCart";
 
+// src/components/cart/CartLoader.jsx
 const CartLoader = () => {
-    const { cartItems, loading, error, getCartItems } = useCart();
+    const { cartItems, loading, error, fetchCartItems } = useCart();
 
     useEffect(() => {
-        getCartItems();
-    }, [getCartItems]);
+        fetchCartItems();
+    }, [fetchCartItems]);
 
     if (loading) return <div>Loading cart items...</div>;
     if (error) return <div>Error loading cart items: {error.message}</div>;

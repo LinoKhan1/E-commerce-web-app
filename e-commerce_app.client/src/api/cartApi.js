@@ -1,3 +1,4 @@
+// src/api/cartApi.js
 import apiClient from "./apiClient";
 
 export const fetchCartItems = async () => {
@@ -21,7 +22,7 @@ export const addCartItem = async (addToCartDto) => {
 
 export const updateCartItem = async (id, quantity) => {
     try {
-        await apiClient.put(`api/cart/${id}`, quantity);
+        await apiClient.put(`api/cart/${id}`, { quantity });
     } catch (error) {
         console.error('Failed to update cart item:', error);
         throw error;

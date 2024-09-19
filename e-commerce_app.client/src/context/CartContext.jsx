@@ -1,5 +1,7 @@
+// src/context/cartContext.jsx
 import React, { createContext, useState, useEffect } from 'react';
-import { getCartItems, addToCart, updateCart, removeFromCart } from '../services/cartService'; // Adjust the import path as necessary
+import { getCartItems, addToCart, updateCart, removeFromCart } from '../services/cartService';
+import { useNavigate } from 'react-router-dom';
 
 export const CartContext = createContext();
 
@@ -8,7 +10,18 @@ export const CartProvider = ({ children }) => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
+    // Helper function to check if the user is logged in
+    const isUserLoggedIn = () => {
+        const token = localStorage.getItem('token'); // Replace with your auth method
+        return !!token; // Returns true if token exists, false otherwise
+    };
+
     const fetchCartItems = async () => {
+        if (!isUserLoggedIn()) {
+            setError('User not logged in. Please login to view the cart.');
+            return;
+        }
+
         setLoading(true);
         setError(null);
         try {
@@ -23,6 +36,12 @@ export const CartProvider = ({ children }) => {
     };
 
     const handleAddToCart = async (product) => {
+        if (!isUserLoggedIn()) {
+            setError('User not logged in. Please login to add items to the cart.');
+            navigate('/login'); // Redirect to login
+            return;
+        }
+
         try {
             await addToCart(product);
             await fetchCartItems(); // Refresh cart items after adding
@@ -33,6 +52,11 @@ export const CartProvider = ({ children }) => {
     };
 
     const handleUpdateCart = async (id, quantity) => {
+        if (!isUserLoggedIn()) {
+            setError('User not logged in. Please login to update the cart.');
+            return;
+        }
+
         try {
             await updateCart(id, quantity);
             await fetchCartItems(); // Refresh cart items after updating
@@ -43,6 +67,11 @@ export const CartProvider = ({ children }) => {
     };
 
     const handleRemoveFromCart = async (id) => {
+        if (!isUserLoggedIn()) {
+            setError('User not logged in. Please login to remove items from the cart.');
+            return;
+        }
+
         try {
             await removeFromCart(id);
             await fetchCartItems(); // Refresh cart items after removal
@@ -58,7 +87,15 @@ export const CartProvider = ({ children }) => {
 
     return (
         <CartContext.Provider
-            value={{ cartItems, loading, error, addToCart: handleAddToCart, updateCart: handleUpdateCart, removeFromCart: handleRemoveFromCart }}
+            value={{
+                cartItems,
+                loading,
+                error,
+                fetchCartItems,
+                handleAddToCart,
+                handleUpdateCart,
+                handleRemoveFromCart,
+            }}
         >
             {children}
         </CartContext.Provider>

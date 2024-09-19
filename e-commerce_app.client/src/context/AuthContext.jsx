@@ -1,7 +1,6 @@
 // src/context/AuthContext.js
-
-import React, {createContext, useState} from "react";
-import { registerUser, loginUser } from "../services/authService";
+import React, { createContext, useState } from 'react';
+import { registerUser, loginUser } from '../services/authService';
 
 export const AuthContext = createContext();
 
@@ -11,8 +10,8 @@ export const AuthProvider = ({ children }) => {
 
     const register = async (registerDTO) => {
         try {
-            const data = await registerUser(registerDTO);
-            setUser(data);
+            await registerUser(registerDTO);
+            setError(null);
         } catch (error) {
             setError(error.message);
         }
@@ -22,13 +21,15 @@ export const AuthProvider = ({ children }) => {
         try {
             const data = await loginUser(loginDTO);
             setUser(data);
+            setError(null);
         } catch (error) {
             setError(error.message);
         }
     };
 
     const logout = () => {
-        setUser(null);
+        setUser(null);  // Clear the user session
+        localStorage.removeItem('authToken'); // Remove auth token from localStorage if used
     };
 
     return (
