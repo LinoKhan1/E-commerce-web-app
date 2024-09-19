@@ -3,6 +3,7 @@ import useCategories from '../../hooks/useCategories';
 import CategoryLoader from '../../components/category/CategoryLoader';
 import CategorySection from '../../components/category/CategorySection';
 import ProductLoader from '../../components/product/ProductLoader';
+import { CartProvider } from '../../context/CartContext.jsx';
 import { ProductProvider } from '../../context/ProductContext';
 import { fetchLimitedProducts } from '../../services/productService';
 
@@ -61,12 +62,15 @@ const Home = () => {
                     <div className="title">
                         <h1>Featured Product</h1>
                     </div>
-                    <ProductProvider>
-                        <div className="row">
-                            <ProductLoader categoryId={3002} />
-                        </div>
-                    </ProductProvider>
-
+                    <CartProvider>
+                        <ProductProvider>
+                            <div className="row">
+                                <ProductLoader categoryId={3002} />
+                            </div>
+                        </ProductProvider>
+                    </CartProvider>
+                       
+                 
                     <div className="row">
                         <div className="col">
                             <h1>Lorem Ipsum Dolor</h1>

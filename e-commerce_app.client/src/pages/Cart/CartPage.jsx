@@ -1,11 +1,15 @@
 import React from "react";
+import CartLoader from "../../components/cart/CartLoader";
 
 const CartPage = () => {
 
 
     return (
         <>
-           <h1>Cart Page</h1>
+            <div className="cart-page">
+                <h1>Your Cart</h1>
+                <CartLoader />
+            </div>
         </>
     );
 }
