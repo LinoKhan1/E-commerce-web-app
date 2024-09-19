@@ -2,7 +2,7 @@
 import * as productApi from '../api/productApi';
 
 // fetch all products
-export const fetchProducts = async (params) => {
+/*export const fetchProducts = async (params) => {
   try {
     const response = await productApi.getProducts(params);
     // Process data if needed
@@ -11,7 +11,7 @@ export const fetchProducts = async (params) => {
     console.error('Error fetching products:', error);
     throw error;
   }
-};
+};*/
 
 // fetch products by ID
 export const fetchProductById = async (id) => {

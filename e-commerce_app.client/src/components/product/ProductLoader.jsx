@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
 import useProducts from '../../hooks/useProduct';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './ProductGrid.scss';
 
 const ProductLoader = ({ categoryId = null }) => {
     const { products, getAllProducts, getProductsByCategory, loading } = useProducts();
 
     useEffect(() => {
         if (categoryId) {
+            console.log('Fetching products for category:', categoryId); // Debugging
             getProductsByCategory(categoryId);
         } else {
+            console.log('Fetching all products'); // Debugging
             getAllProducts();
         }
     }, [categoryId]);
@@ -18,9 +18,9 @@ const ProductLoader = ({ categoryId = null }) => {
 
     return (
         <div className="row">
-            {products.length > 0 ? (
+            {products && products.length > 0 ? (
                 products.map((product) => (
-                    <div key={product.id} className="col-lg-3 col-md-4 col-sm-6">
+                    <div key={product.id} className="col-lg-3">
                         <div className="product-card">
                             <img src={product.imageUrl} alt={product.name} className="product-image" />
                             <h3 className="product-name">{product.name}</h3>

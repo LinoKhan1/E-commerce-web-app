@@ -1,7 +1,5 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
-import CategoryLoader from '../../components/category/CategoryLoader.jsx';
-import CategoryList from '../../components/category/CategoryList.jsx';
 const Navbar = () => {
 
     return (
@@ -12,9 +10,6 @@ const Navbar = () => {
                 </li>
                 <li>
                     <Link to="/shop">Shop</Link>
-                    <CategoryLoader>
-                        <CategoryList />
-                    </CategoryLoader>
                 </li>
                 <li>
                     <Link to="/cart">Cart</Link>
