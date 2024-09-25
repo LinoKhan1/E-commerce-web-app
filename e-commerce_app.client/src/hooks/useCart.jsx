@@ -1,6 +1,6 @@
-// src/hooks/useCart
-import React, { useContext } from "react";
-import { CartContext } from "../context/CartContext";
+// src/hooks/useCart.js
+/*import { useContext } from 'react';
+import { CartContext } from '../context/CartContext';
 
 const useCart = () => {
     const context = useContext(CartContext);
@@ -11,3 +11,4 @@ const useCart = () => {
 };
 
 export default useCart;
+*/

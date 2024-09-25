@@ -8,20 +8,21 @@ import Cart from './pages/Cart/CartPage.jsx';
 import LoginPage from './pages/Authentication/LoginPage.jsx';
 import RegisterPage from './pages/Authentication/RegisterPage.jsx';
 import { AuthProvider } from './context/AuthContext';
-import { CartProvider } from './context/CartContext.jsx';
+import ProductDetail from './pages/Product/ProductDetail.jsx';
 
 const App = () => {
     return (
         <BrowserRouter>
             <AuthProvider>
-                    <Routes>
-                        <Route path="/" element={<Layout />}>
-                            <Route index element={<Home />} />
-                            <Route path="shop" element={<Shop />} />
-                            <Route path="shop/category/:categoryId" element={<Shop />} />
-                            <Route path="cart" element={<Cart />} />
-                            <Route path="login" element={<LoginPage />} />
-                            <Route path="register" element={<RegisterPage />} />
+                <Routes>
+                    <Route path="/" element={<Layout />}>
+                        <Route index element={<Home />} />
+                        <Route path="shop" element={<Shop />} />
+                        <Route path="product/:id" element={<ProductDetail />} />
+                        <Route path="shop/category/:categoryId" element={<Shop />} />
+                        <Route path="cart" element={<Cart />} />
+                        <Route path="login" element={<LoginPage />} />
+                        <Route path="register" element={<RegisterPage />} />
                         </Route>
                     </Routes>
             </AuthProvider>

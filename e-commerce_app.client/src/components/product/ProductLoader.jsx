@@ -1,10 +1,10 @@
-import React, { useEffect, useContext } from 'react';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import useProducts from '../../hooks/useProduct';
-import { CartContext } from '../../context/CartContext'; // Adjust the import path as necessary
 
 const ProductLoader = ({ categoryId = null }) => {
     const { products, getAllProducts, getProductsByCategory, loading } = useProducts();
-    const { handleAddToCart } = useContext(CartContext); // Use handleAddToCart from CartContext
+    const navigate = useNavigate(); // Initialize navigate
 
     useEffect(() => {
         if (categoryId) {
@@ -15,14 +15,6 @@ const ProductLoader = ({ categoryId = null }) => {
             getAllProducts();
         }
     }, [categoryId]);
-
-    const handleAddToCartClick = (product) => {
-        if (handleAddToCart) {
-            handleAddToCart(product);
-        } else {
-            console.error('handleAddToCart is not defined');
-        }
-    };
 
     if (loading) return <div>Loading products...</div>;
 
@@ -36,10 +28,10 @@ const ProductLoader = ({ categoryId = null }) => {
                             <h3 className="product-name">{product.name}</h3>
                             <p className="product-price">${product.price.toFixed(2)}</p>
                             <button
-                                onClick={() => handleAddToCartClick(product)}
                                 className="btn btn-primary"
+                                onClick={() => navigate(`/product/${product.productId}`)} // Navigate to the product detail page
                             >
-                                Add to Cart
+                                View Product
                             </button>
                         </div>
                     </div>

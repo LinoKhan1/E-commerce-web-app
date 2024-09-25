@@ -15,14 +15,15 @@ import * as productApi from '../api/productApi';
 
 // fetch products by ID
 export const fetchProductById = async (id) => {
-  try {
-    const response = await productApi.getProductById(id);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching product:', error);
-    throw error;
-  }
+    try {
+        const productData = await productApi.getProductById(id); // Get product data directly
+        return productData; // Return the product data or null
+    } catch (error) {
+        console.error('Error fetching product:', error);
+        throw error; // Rethrow error for handling in the component
+    }
 };
+
 
 /**
  * Fetch a limited number of products.

@@ -1,32 +1,32 @@
-import React, {useEffect} from "react";
-import useCart from "../../hooks/useCart";
+// src/components/CartLoader.jsx
+/*import React, { useEffect } from 'react';
+import { useCart } from '../../hooks/useCart';
 
-// src/components/cart/CartLoader.jsx
 const CartLoader = () => {
-    const { cartItems, loading, error, fetchCartItems } = useCart();
+    const { cartItems, loading, addToCart, updateCart, removeFromCart } = useCart();
 
-    useEffect(() => {
-        fetchCartItems();
-    }, [fetchCartItems]);
-
-    if (loading) return <div>Loading cart items...</div>;
-    if (error) return <div>Error loading cart items: {error.message}</div>;
+    if (loading) {
+        return <p>Loading cart...</p>;
+    }
 
     return (
-        <div className="cart-items">
-            {cartItems.length > 0 ? (
-                cartItems.map(item => (
-                    <div key={item.id} className="cart-item">
-                        <h3>{item.productName}</h3>
-                        <p>Quantity: {item.quantity}</p>
-                        <p>Price: ${item.price}</p>
-                    </div>
-                ))
+        <div>
+            {cartItems.length === 0 ? (
+                <p>Your cart is empty.</p>
             ) : (
-                <p>No items in the cart.</p>
+                <ul>
+                    {cartItems.map((item) => (
+                        <li key={item.cartItemId}>
+                            {item.productName} - {item.quantity}
+                            <button onClick={() => updateCart(item.cartItemId, item.quantity + 1)}>+</button>
+                            <button onClick={() => updateCart(item.cartItemId, item.quantity - 1)}>-</button>
+                            <button onClick={() => removeFromCart(item.cartItemId)}>Remove</button>
+                        </li>
+                    ))}
+                </ul>
             )}
         </div>
     );
-};
+};*/
 
 export default CartLoader;

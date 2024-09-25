@@ -4,10 +4,7 @@ import axios from 'axios';
 // Function to get the token form localStorage 
 const getToken = () => {
     return localStorage.getItem('token');
-};
-
-
-
+}
 // Create an Axios instance
 const apiClient = axios.create({
     baseURL: import.meta.env.VITE_API_BASE_URL,

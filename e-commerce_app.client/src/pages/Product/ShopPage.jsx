@@ -3,7 +3,6 @@ import { useParams, Link } from 'react-router-dom';
 import useCategories from '../../hooks/useCategories.jsx';
 import CategoryLoader from '../../components/category/CategoryLoader.jsx';
 import { ProductProvider } from '../../context/ProductContext.jsx';
-import { CartProvider } from '../../context/CartContext.jsx';
 import ProductLoader from '../../components/product/ProductLoader.jsx';
 import './Shop.scss';
 
@@ -60,11 +59,9 @@ const ShopPage = () => {
                         </label>
                     </div>
                 </div>
-                <CartProvider>
                     <ProductProvider>
                         <ProductLoader categoryId={categoryId} />
                     </ProductProvider>
-                </CartProvider>            
             </main>
         </div>
     );

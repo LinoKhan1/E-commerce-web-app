@@ -20,14 +20,18 @@ export const getProducts = async (params = {}) => {
  * @returns {Promise<Object>} - Promise resolving to the product data.
  */
 export const getProductById = async (id) => {
-  try {
-    const response = await apiClient.get(`api/product/${id}`);
-    return response.data;
-  } catch (error) {
-    console.error(`Error fetching product with ID ${id}:`, error);
-    throw error;
-  }
+    try {
+        const response = await apiClient.get(`api/product/${id}`);
+        if (response.status === 204) {
+            return null; // Handle no content
+        }
+        return response.data; // Return the product data
+    } catch (error) {
+        console.error(`Error fetching product with ID ${id}:`, error);
+        throw error; // Rethrow the error for further handling
+    }
 };
+
 
 /**
  * Fetch products from a specific category.
@@ -83,7 +87,7 @@ export const updateProduct = async (id, productData) => {
  */
 export const deleteProduct = async (id) => {
   try {
-    await apiClient.delete(`api/products/${id}`);
+    await apiClient.delete(`api/product/${id}`);
   } catch (error) {
     console.error(`Error deleting product with ID ${id}:`, error);
     throw error;

@@ -11,7 +11,7 @@ export const getCartItems = async () => {
     }
 };
 
-export const addToCart = async (addToCartDto) => {
+export const addItemToCart = async (addToCartDto) => {
     try {
         await addCartItem(addToCartDto);
     } catch (error) {
@@ -20,7 +20,7 @@ export const addToCart = async (addToCartDto) => {
     }
 };
 
-export const updateCart = async (id, quantity) => {
+export const updateToCart = async (id, quantity) => {
     try {
         await updateCartItem(id, quantity);
     } catch (error) {
@@ -29,7 +29,7 @@ export const updateCart = async (id, quantity) => {
     }
 };
 
-export const removeFromCart = async (id) => {
+export const deleteFromCart = async (id) => {
     try {
         await removeCartItem(id);
     } catch (error) {
