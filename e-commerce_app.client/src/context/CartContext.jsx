@@ -1,88 +1,72 @@
-// src/context/CartContext.jsx
-/*import React, { createContext, useState, useEffect } from 'react';
-import useAuth from '../hooks/useAuth'; // Correct import for default export
-import { getCartItems, addItemToCart, updateToCart, deleteFromCart } from '../services/cartService';
-import { useNavigate } from 'react-router-dom';
+// src/contexts/CartContext.js
+/*import React, { createContext, useEffect, useState } from 'react';
+import { useAuth } from '../hooks/useAuth'; // Assuming you have an Auth hook to check authentication
+import cartService from '../services/cartService';
 
-const CartContext = createContext();
+// Create a context for the cart
+export const CartContext = createContext();
 
+// Cart Provider component
 export const CartProvider = ({ children }) => {
+    const { isAuthenticated } = useAuth(); // Get authentication status from the auth hook
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const { isAuthenticated } = useAuth(); // Authentication state
-    const navigate = useNavigate();
+    const [error, setError] = useState(null);
 
+    // Fetch cart items if the user is authenticated
     useEffect(() => {
-        if (isAuthenticated) {
-            fetchCartItems();
-        } else {
-            navigate('/login'); // Redirect to login if not authenticated
-        }
-    }, [isAuthenticated, navigate]);
+        const fetchCartItems = async () => {
+            if (isAuthenticated) {
+                try {
+                    const items = await cartService.getCartItems();
+                    setCartItems(items);
+                } catch (err) {
+                    setError(err.message);
+                } finally {
+                    setLoading(false);
+                }
+            } else {
+                setCartItems([]); // Reset cart items if not authenticated
+                setLoading(false);
+            }
+        };
 
-    const fetchCartItems = async () => {
-        try {
-            setLoading(true);
-            const items = await getCartItems();
-            setCartItems(items);
-        } catch (error) {
-            console.error("Failed to fetch cart items:", error);
-        } finally {
-            setLoading(false);
+        fetchCartItems();
+    }, [isAuthenticated]); // Run when authentication status changes
+
+    // Function to add an item to the cart
+    const addItemToCart = async (cartItem) => {
+        if (!isAuthenticated) {
+            throw new Error('User not authenticated');
         }
+        await cartService.addItem(cartItem);
+        const updatedCartItems = await cartService.getCartItems(); // Refresh cart items
+        setCartItems(updatedCartItems);
     };
 
-    const addToCart = async (productId, quantity) => {
+    // Function to update an item in the cart
+    const updateCartItem = async (id, quantity) => {
         if (!isAuthenticated) {
-            navigate('/login');
-            return;
+            throw new Error('User not authenticated');
         }
-        try {
-            await addItemToCart({ productId, quantity });
-            await fetchCartItems();
-        } catch (error) {
-            console.error("Failed to add item to cart:", error);
-        }
+        await cartService.updateItem(id, quantity);
+        const updatedCartItems = await cartService.getCartItems(); // Refresh cart items
+        setCartItems(updatedCartItems);
     };
 
-    const updateCart = async (cartItemId, quantity) => {
+    // Function to remove an item from the cart
+    const removeCartItem = async (id) => {
         if (!isAuthenticated) {
-            navigate('/login');
-            return;
+            throw new Error('User not authenticated');
         }
-        try {
-            await updateToCart(cartItemId, quantity);
-            await fetchCartItems();
-        } catch (error) {
-            console.error("Failed to update cart item:", error);
-        }
-    };
-
-    const removeFromCart = async (cartItemId) => {
-        if (!isAuthenticated) {
-            navigate('/login');
-            return;
-        }
-        try {
-            await deleteFromCart(cartItemId);
-            await fetchCartItems();
-        } catch (error) {
-            console.error("Failed to remove item from cart:", error);
-        }
+        await cartService.removeItem(id);
+        const updatedCartItems = await cartService.getCartItems(); // Refresh cart items
+        setCartItems(updatedCartItems);
     };
 
     return (
-        <CartContext.Provider
-            value={{
-                cartItems,
-                addToCart,
-                updateCart,
-                removeFromCart,
-                loading,
-            }}
-        >
+        <CartContext.Provider value={{ cartItems, loading, error, addItemToCart, updateCartItem, removeCartItem }}>
             {children}
         </CartContext.Provider>
     );
-};
-*/
+};*/

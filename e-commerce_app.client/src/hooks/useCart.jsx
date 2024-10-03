@@ -2,6 +2,11 @@
 /*import { useContext } from 'react';
 import { CartContext } from '../context/CartContext';
 
+/**
+ * Custom hook to use the Cart context.
+ * @returns {Object} - Contains cart state and actions.
+ * @throws {Error} - Throws an error if used outside of CartProvider.
+ *
 const useCart = () => {
     const context = useContext(CartContext);
     if (!context) {
@@ -10,5 +15,4 @@ const useCart = () => {
     return context;
 };
 
-export default useCart;
-*/
+export default useCart;*/

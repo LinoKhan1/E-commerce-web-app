@@ -18,6 +18,10 @@ namespace e_commerce_app.Server.Infrastructure.Data
 
         public DbSet<CartItem> CartItems { get; set; }
 
+        public DbSet<Order> Orders {  get; set; }
+
+        public DbSet<OrderItem> OrderItems { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             builder.Entity<CartItem>()
@@ -34,6 +38,11 @@ namespace e_commerce_app.Server.Infrastructure.Data
                 .HasMany(c => c.Products)
                 .WithOne(p => p.Category)
                 .HasForeignKey(p => p.CategoryId);
+
+            builder.Entity<Order>()
+                .HasMany(o => o.OrderItems)
+                .WithOne(oi => oi.Order)
+                .HasForeignKey(oi => oi.OrderId);
 
             base.OnModelCreating(builder);
 

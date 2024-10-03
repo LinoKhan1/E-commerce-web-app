@@ -10,17 +10,16 @@ namespace e_commerce_app.Server.Infrastructure.unitOfWork
         private IProductRepository _productRepository;
         private ICategoryRepository _categoryRepository;
         private ICartRepository _cartRepository;
+        private IOrderRepository _orderRepository;
         private bool disposedValue;
         private readonly ILogger<ProductRepository> _logger;
         private readonly ILogger<CategoryRepository> _loggerCategory;
-        private readonly ILogger<CartRepository> _loggerCart;
 
-        public UnitOfWork(ApplicationDbContext context, ILogger<ProductRepository> logger, ILogger<CategoryRepository> loggerCategory, ILogger<CartRepository> loggerCart)
+        public UnitOfWork(ApplicationDbContext context, ILogger<ProductRepository> logger, ILogger<CategoryRepository> loggerCategory)
         {
             _context = context;
             _logger = logger;
             _loggerCategory = loggerCategory;
-            _loggerCart = loggerCart;
         }
 
         public IProductRepository ProductRepository
@@ -54,10 +53,23 @@ namespace e_commerce_app.Server.Infrastructure.unitOfWork
             {
                 if (_cartRepository == null)
                 {
-                    _cartRepository = new CartRepository(_context, _loggerCart);
+                    _cartRepository = new CartRepository(_context);
                 }
                 return _cartRepository; 
             }
+        }
+        public IOrderRepository OrderRepository
+        {
+            get
+            {
+                if(_orderRepository == null)
+                {
+                    _orderRepository = new OrderRepository(_context);
+                }
+                return _orderRepository;
+
+            }
+
         }
 
 

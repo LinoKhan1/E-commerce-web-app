@@ -1,39 +1,28 @@
 // src/services/cartService.js
-import { fetchCartItems, addCartItem, updateCartItem, removeCartItem } from "../api/cartApi";
+import { getUserIdFromToken } from '../utils/authUtils';
+import { getCartItemsByUserId, addToCart, updateCartItem, deleteCartItem } from '../api/cartApi';
 
-export const getCartItems = async () => {
-    try {
-        const data = await fetchCartItems();
-        return data;
-    } catch (error) {
-        console.error('Failed to fetch cart items:', error);
-        throw error;
+export const fetchCartItems = async () => {
+    const userId = getUserIdFromToken();
+    if (!userId) {
+        throw new Error('User ID not found in token');
     }
+    return await getCartItemsByUserId(userId);
 };
 
-export const addItemToCart = async (addToCartDto) => {
-    try {
-        await addCartItem(addToCartDto);
-    } catch (error) {
-        console.error('Failed to add cart item:', error);
-        throw error;
+export const addItemToCart = async (productId, quantity) => {
+    const userId = getUserIdFromToken();
+    if (!userId) {
+        throw new Error('User ID not found in token');
     }
+    const addToCartDTO = { userId, productId, quantity }; // Adjust DTO according to your backend expectations
+    return await addToCart(addToCartDTO);
 };
 
-export const updateToCart = async (id, quantity) => {
-    try {
-        await updateCartItem(id, quantity);
-    } catch (error) {
-        console.error('Failed to update cart item:', error);
-        throw error;
-    }
+export const updateCart = async (cartItemDTO) => {
+    return await updateCartItem(cartItemDTO);
 };
 
-export const deleteFromCart = async (id) => {
-    try {
-        await removeCartItem(id);
-    } catch (error) {
-        console.error('Failed to remove cart item:', error);
-        throw error;
-    }
+export const removeCartItem = async (cartItemId) => {
+    return await deleteCartItem(cartItemId);
 };

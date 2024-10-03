@@ -1,32 +1,16 @@
-// src/components/CartLoader.jsx
-/*import React, { useEffect } from 'react';
-import { useCart } from '../../hooks/useCart';
+/*// src/components/CartLoader.jsx
+import React from 'react';
 
+/**
+ * CartLoader component that displays a loading message.
+ * @returns {JSX.Element} - Loading message while fetching cart items.
+ *
 const CartLoader = () => {
-    const { cartItems, loading, addToCart, updateCart, removeFromCart } = useCart();
-
-    if (loading) {
-        return <p>Loading cart...</p>;
-    }
-
     return (
-        <div>
-            {cartItems.length === 0 ? (
-                <p>Your cart is empty.</p>
-            ) : (
-                <ul>
-                    {cartItems.map((item) => (
-                        <li key={item.cartItemId}>
-                            {item.productName} - {item.quantity}
-                            <button onClick={() => updateCart(item.cartItemId, item.quantity + 1)}>+</button>
-                            <button onClick={() => updateCart(item.cartItemId, item.quantity - 1)}>-</button>
-                            <button onClick={() => removeFromCart(item.cartItemId)}>Remove</button>
-                        </li>
-                    ))}
-                </ul>
-            )}
+        <div className="cart-loader">
+            <h2>Loading cart items...</h2>
         </div>
     );
-};*/
+};
 
-export default CartLoader;
+export default CartLoader;*/

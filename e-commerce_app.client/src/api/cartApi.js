@@ -1,36 +1,40 @@
 // src/api/cartApi.js
 import apiClient from './apiClient';
 
-export const fetchCartItems = async () => {
+export const getCartItemsByUserId = async (userId) => {
     try {
-        const response = await apiClient.get('/api/cart');
+        const response = await apiClient.get(`/api/cart/user/${userId}`);
         return response.data;
     } catch (error) {
-        throw new Error(`Failed to fetch cart items: ${error.message}`);
+        console.error('Failed to fetch cart items:', error);
+        throw error;
     }
 };
 
-export const addCartItem = async (cartItem) => {
+export const addToCart = async (addToCartDTO) => {
     try {
-        const response = await apiClient.post('/api/cart', cartItem);
+        const response = await apiClient.post('/api/cart', addToCartDTO);
         return response.data;
     } catch (error) {
-        throw new Error(`Failed to add item to cart: ${error.message}`);
+        console.error('Failed to add item to cart:', error);
+        throw error;
     }
 };
 
-export const updateCartItem = async (id, quantity) => {
+export const updateCartItem = async (cartItemDTO) => {
     try {
-        await apiClient.put(`/api/cart/${id}`, { quantity });
+        await apiClient.put('/api/cart', cartItemDTO);
     } catch (error) {
-        throw new Error(`Failed to update cart item: ${error.message}`);
+        console.error('Failed to update cart item:', error);
+        throw error;
     }
 };
 
-export const removeCartItem = async (id) => {
+export const deleteCartItem = async (cartItemId) => {
     try {
-        await apiClient.delete(`/api/cart/${id}`);
+        await apiClient.delete(`/api/cart/${cartItemId}`);
     } catch (error) {
-        throw new Error(`Failed to remove cart item: ${error.message}`);
+        console.error('Failed to delete cart item:', error);
+        throw error;
     }
 };

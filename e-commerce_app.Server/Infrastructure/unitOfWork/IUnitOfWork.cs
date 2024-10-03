@@ -8,6 +8,7 @@ namespace e_commerce_app.Server.Infrastructure.unitOfWork
         ICategoryRepository CategoryRepository { get; }
 
         ICartRepository CartRepository { get; }
+        IOrderRepository OrderRepository { get; }
 
         Task<int> CompleteAsync();
     }

@@ -1,13 +1,10 @@
 ﻿using e_commerce_app.Server.APIs.DTOs.CartDTOs;
+using e_commerce_app.Server.APIs.DTOs.CheckoutDTO;
+using e_commerce_app.Server.Core.Services;
 using e_commerce_app.Server.Core.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace e_commerce_app.Server.APIs.Controllers
 {
@@ -18,6 +15,8 @@ namespace e_commerce_app.Server.APIs.Controllers
     {
         private readonly ICartService _cartService;
         private readonly ILogger<CartController> _logger;
+        private readonly IOrderService _orderService;
+        private readonly IPayPalService _payPalService;
 
         public CartController(ICartService cartService, ILogger<CartController> logger)
         {
@@ -25,108 +24,102 @@ namespace e_commerce_app.Server.APIs.Controllers
             _logger = logger;
         }
 
-        /// <summary>
-        /// Gets the cart items for the authenticated user.
-        /// </summary>
-        /// <returns>A list of cart items.</returns>
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<CartItemDTO>>> GetCartItems()
+        [HttpGet("{cartItemId}")]
+        public async Task<IActionResult> GetCartItem(int cartItemId)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (userId == null)
-            {
-                _logger.LogWarning("User ID not found in claims.");
-                return BadRequest("User ID not found in claims.");
-            }
-
             try
             {
-                var cartItems = await _cartService.GetCartItemsAsync(userId);
+                var cartItem = await _cartService.GetCartItemByIdAsync(cartItemId);
+                return Ok(cartItem);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while retrieving cart item with ID {cartItemId}");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetCartItemsByUserId(string userId)
+        {
+            try
+            {
+                var cartItems = await _cartService.GetCartItemsByUserIdAsync(userId);
                 return Ok(cartItems);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while retrieving cart items for user {UserId}.", userId);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while retrieving cart items.");
+                _logger.LogError(ex, $"Error occurred while retrieving cart items for user {userId}");
+                return StatusCode(500, "Internal server error");
             }
         }
 
-        /// <summary>
-        /// Adds a new item to the cart for the authenticated user.
-        /// </summary>
-        /// <param name="addToCartDto">The data transfer object containing the details of the item to add.</param>
         [HttpPost]
-        public async Task<IActionResult> AddCart([FromBody] AddToCartDTO addToCartDto)
-        {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-
-            if (userId == null)
-            {
-                _logger.LogWarning("User ID not found in claims.");
-                return BadRequest("User ID not found in claims.");
-            }
-
-            try
-            {
-                await _cartService.AddCartItemAsync(userId, addToCartDto);
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while adding a new item to the cart for user {UserId}.", userId);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while adding the item to the cart.");
-            }
-        }
-
-        /// <summary>
-        /// Updates the quantity of an existing cart item.
-        /// </summary>
-        /// <param name="id">The unique identifier for the cart item.</param>
-        /// <param name="quantity">The new quantity for the cart item.</param>
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCartItem(int id, [FromBody] int quantity)
-        {
-            if (quantity <= 0)
-            {
-                _logger.LogWarning("Invalid quantity {Quantity} for cart item {CartItemId}.", quantity, id);
-                return BadRequest("Quantity must be greater than zero.");
-            }
-
-            try
-            {
-                await _cartService.UpdateCartItemAsync(id, quantity);
-                return Ok();
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogWarning(ex, "Cart item with ID {CartItemId} not found.", id);
-                return NotFound($"Cart item with ID {id} not found.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred while updating cart item with ID {CartItemId}.", id);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while updating the cart item.");
-            }
-        }
-
-        /// <summary>
-        /// Removes a cart item.
-        /// </summary>
-        /// <param name="id">The unique identifier for the cart item.</param>
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> RemoveCartItem(int id)
+        public async Task<IActionResult> AddToCart([FromBody] AddToCartDTO addToCartDto)
         {
             try
             {
-                await _cartService.RemoveCartItemAsync(id);
-                return Ok();
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                await _cartService.AddCartItemAsync(addToCartDto, userId);
+                return CreatedAtAction(nameof(GetCartItemsByUserId), new { userId }, null);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while removing cart item with ID {CartItemId}.", id);
-                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while removing the cart item.");
+                _logger.LogError(ex, "Error occurred while adding item to cart");
+                return StatusCode(500, "Internal server error");
             }
         }
+
+        [HttpPut]
+        public async Task<IActionResult> UpdateCartItem([FromBody] CartItemDTO cartItemDto)
+        {
+            try
+            {
+                await _cartService.UpdateCartItemAsync(cartItemDto);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while updating cart item with ID {cartItemDto.Id}");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+        [HttpDelete("{cartItemId}")]
+        public async Task<IActionResult> DeleteCartItem(int cartItemId)
+        {
+            try
+            {
+                await _cartService.DeleteCartItemAsync(cartItemId);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error occurred while deleting cart item with ID {cartItemId}");
+                return StatusCode(500, "Internal server error");
+            }
+        }
+
+         [HttpPost("checkout")]
+         public async Task<IActionResult> Checkout([FromBody] CheckoutDTO checkoutDto)
+         {
+             try
+             {
+                 var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                 // Create the order
+                 var order = await _orderService.CreateOrderAsync(userId, checkoutDto.CartItems, checkoutDto.ShippingAddress);
+
+                 // Proceed to generate PayPal payment link
+                 var paymentUrl = await _payPalService.CreatePaymentAsync(order);
+
+                 return Ok(new { paymentUrl });
+             }
+             catch (Exception ex)
+             {
+                 _logger.LogError(ex, "Error occurred during checkout");
+                 return StatusCode(500, "Internal server error");
+             }
+         }
     }
 }
